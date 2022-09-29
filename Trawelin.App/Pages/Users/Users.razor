@@ -1,0 +1,171 @@
+﻿@page "/users"
+@using Trawelin.App.Infrastructure.Constants.Storage
+@using Trawelin.App.Shared.Users
+@inject IDialogService DialogService
+
+<MudButton Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Ekle</MudButton>
+<MudButton Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Sil</MudButton>
+<MudButton Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">Duzenle</MudButton>
+
+<MudDataGrid T="ApplicationUserDto" MultiSelection="true" Items="@UserList" SortMode="SortMode.Multiple" Filterable="true"
+             Hideable="true" RowClick="@RowClicked" SelectedItemsChanged="@SelectedItemsChanged">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Kullanicilar</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Ara" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="ApplicationUserDto" />
+        <Column T="ApplicationUserDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
+        <Column T="ApplicationUserDto" Field="UserName" Title="Kullanici Adi" />
+        <Column T="ApplicationUserDto" Field="Email" />
+        
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="ApplicationUserDto" />
+    </PagerContent>
+</MudDataGrid>
+
+<div class="d-flex flex-wrap mt-4">
+    <MudSwitch @bind-Checked="@_sortNameByLength" Color="Color.Primary">Sort Name Column By Length</MudSwitch>
+</div>
+
+<MudExpansionPanels Style="flex:1">
+    <MudExpansionPanel Text="Show Events">
+        @foreach (var message in _events)
+        {
+            <MudText Typo="@Typo.body2">@message</MudText>
+        }
+        @if (_events.Count > 0)
+        {
+            <div class="d-flex">
+                <MudSpacer />
+                <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="@(() => _events.Clear())">Clear</MudButton>
+            </div>
+        }
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
+
+@code {
+    private bool _hover;
+    private bool _dense;
+    private bool _striped;
+    private bool _bordered;
+
+    private List<ApplicationUserDto> selectedItems;
+
+    private List<ApplicationUserDto> UserList;
+    string result = "";
+    bool editActive = false;
+    bool deleteActive = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
+
+        //Service Init
+        Client service = new Client("https://api.trawelin.com", _httpClient);
+        //Get Token From Service
+        var response = await service.ApiUsersGetAsync();
+        if (response.Succeeded == true)
+        {
+            UserList = response.Data.ToList();
+            foreach (ApplicationUserDto item in UserList)
+            {
+                Console.WriteLine(item.UserName);
+            }
+        }
+        else
+        {
+            result = response.Error.Message;
+        }
+    }
+
+    private string _searchString;
+    private bool _sortNameByLength;
+    private List<string> _events = new();
+
+    // events
+    void RowClicked(DataGridRowClickEventArgs<ApplicationUserDto> args)
+    {
+        _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
+    }
+
+    void SelectedItemsChanged(HashSet<ApplicationUserDto> items)
+    {
+        _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
+        selectedItems = items.ToList();
+
+        editActive = selectedItems.Count == 1;
+        deleteActive = selectedItems.Count > 0;
+    }
+
+
+
+    async Task DeleteButton()
+    {
+        ApplicationUserDto dto = selectedItems[0];
+        var parameters = new DialogParameters { ["server"] = dto, ["buttonColor"] = Color.Error, ["buttonText"] = "Delete" };
+
+        var dialog = DialogService.Show<UsersDialog>("Delete User", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            var response = await _userManager.DeleteUserAsync(dto.Id);
+            if (response.Succeeded) { 
+                _navigationManager.NavigateTo(_navigationManager.Uri, true);
+            }
+
+        }
+
+    }
+
+    async Task EditButton()
+    {
+        ApplicationUserDto dto = selectedItems[0];
+        var parameters = new DialogParameters { ["server"] = dto, ["buttonColor"] = Color.Primary, ["buttonText"] = "Edit" };
+
+        var dialog = DialogService.Show<UsersDialog>("Edit User", parameters);
+        var result = await dialog.Result;
+        ApplicationUserDto test = result.Data as ApplicationUserDto;
+
+        if (!result.Cancelled)
+        {
+            UpdateUserCommand updateUserCommand = new();
+            updateUserCommand.Id = dto.Id;
+            updateUserCommand.Username = test.UserName;
+            var response = await _userManager.UpdateUserAsync(updateUserCommand);
+            if (response.Succeeded)
+            {
+                _navigationManager.NavigateTo(_navigationManager.Uri, true);
+            }
+
+        }
+
+    }
+
+    async Task CreateButton()
+    {
+        var parameters = new DialogParameters {};
+
+        var dialog = DialogService.Show<CreateUserDialog>("Create User", parameters);
+        var result = await dialog.Result;
+        
+
+        if (!result.Cancelled)
+        {
+            CreateUserCommand createUserCommand = result.Data as CreateUserCommand;
+            var response = await _userManager.CreateUserAsync(createUserCommand);
+            if (response.Succeeded)
+            {
+                _navigationManager.NavigateTo(_navigationManager.Uri,true);
+            }
+
+        }
+
+    }
+
+}

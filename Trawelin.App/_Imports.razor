@@ -1,0 +1,26 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Blazored.LocalStorage
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using MudBlazor
+@using Trawelin.App
+@using Trawelin.App.Infrastructure.Managers.Identity.Authentication
+@using Trawelin.App.Infrastructure.Managers.Identity.Users
+@using Trawelin.App.Shared
+@using Trawelin.App.Infrastructure
+@using Trawelin.App.Infrastructure.ServiceApi
+
+
+@attribute [Authorize]
+@inject IAuthenticationManager _authenticationManager
+@inject HttpClient _httpClient
+@inject ILocalStorageService _localStorage;
+@inject IJSRuntime _jsRuntime;
+@inject NavigationManager _navigationManager
+@inject IUserManager _userManager

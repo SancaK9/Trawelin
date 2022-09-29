@@ -1,0 +1,37 @@
+﻿
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1" />
+            Delete server?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField Value="@server.Id.ToString()" Label="Server ID" />
+        <MudTextField @bind-Value="@server.UserName" Label="Server Name"  />
+        <MudTextField @bind-Value="@server.Email" Label="Location" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="@buttonColor" OnClick="DeleteServer">@buttonText</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public ApplicationUserDto server { get; set; } = new ApplicationUserDto();
+
+    [Parameter] public Color buttonColor { get; set; }
+
+    [Parameter] public string buttonText { get; set; }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void DeleteServer()
+    {
+        MudDialog.Close(DialogResult.Ok(server));
+    }
+}
