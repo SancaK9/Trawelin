@@ -1,0 +1,34 @@
+﻿
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Create" Class="mr-3 mb-n1" />
+            Create City?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@createCityCommand.CountryId" Label="Country Id"  ReadOnly="true"/>
+        <MudTextField @bind-Value="@createCityCommand.Name" Label="Isim" />
+        
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Success" OnClick="CreateCity">Ekle</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public CreateCityCommand createCityCommand { get; set; } = new CreateCityCommand();
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void CreateCity()
+    {
+        MudDialog.Close(DialogResult.Ok(createCityCommand));
+    }
+}

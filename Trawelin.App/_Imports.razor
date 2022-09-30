@@ -11,6 +11,7 @@
 @using MudBlazor
 @using Trawelin.App
 @using Trawelin.App.Infrastructure.Managers.Identity.Authentication
+@using Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
 @using Trawelin.App.Infrastructure.Managers.Identity.Users
 @using Trawelin.App.Shared
 @using Trawelin.App.Infrastructure
@@ -18,9 +19,15 @@
 
 
 @attribute [Authorize]
-@inject IAuthenticationManager _authenticationManager
 @inject HttpClient _httpClient
-@inject ILocalStorageService _localStorage;
-@inject IJSRuntime _jsRuntime;
 @inject NavigationManager _navigationManager
+
+@inject IJSRuntime _jsRuntime;
+
+@inject IAuthenticationManager _authenticationManager
+@inject ILocalStorageService _localStorage;
+
 @inject IUserManager _userManager
+@inject IRegionManager _regionManager
+
+@inject ISnackbar Snackbar

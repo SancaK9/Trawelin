@@ -1,0 +1,35 @@
+﻿
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Delete" Class="mr-3 mb-n1" />
+            Delete Country?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@countryDto.Id" Label="Id" ReadOnly="true" />
+        <MudTextField @bind-Value="@countryDto.Name" Label="Isim" />
+        <MudTextField @bind-Value="@countryDto.Code" Label="Kod" />
+        <MudTextField @bind-Value="@countryDto.IsoCode" Label="IsoKod" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteCountry">Sil</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public CountryDto countryDto { get; set; } = new CountryDto();
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void DeleteCountry()
+    {
+        MudDialog.Close(DialogResult.Ok(countryDto));
+    }
+}

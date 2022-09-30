@@ -1,0 +1,211 @@
+﻿@page "/citydefinition/{id}"
+@using AutoMapper
+@using Trawelin.App.Infrastructure.Constants.Storage
+@using Trawelin.App.Shared.Definitions.Regions.City
+@using Trawelin.App.Shared.Users
+@inject IDialogService DialogService
+@inject IMapper _mapper
+@inject ISnackbar Snackbar
+
+
+
+<MudDataGrid T="CityDto" @ref="_mudTable" MultiSelection="true" Items="@cityList" SortMode="SortMode.Multiple" Filterable="true"
+             QuickFilter="@_quickFilter" Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" Striped="true" Bordered="true">
+    <ToolBarContent>
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Ekle</MudButton>
+
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Sil</MudButton>
+
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">Duzenle</MudButton>
+
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="GoToDistrictButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.ArrowRight" Color="Color.Info">Ilceye Git</MudButton>
+
+
+        <MudSpacer />
+        <MudText Typo="Typo.h4">Sehirler</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Ara" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="CityDto" />
+        <Column T="CityDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
+
+        <Column T="CityDto" Field="Name" Title="Ulke" Sortable="false" Filterable="false" IsEditable="false" />
+
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="CityDto" />
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+
+    [Parameter]
+    public string id { get; set; }
+
+    //DataGrid Table
+    private MudDataGrid<CityDto> _mudTable;
+    //DataGrid Data
+    private List<CityDto> cityList = new List<CityDto>();
+    private List<CityDto> selectedItems;
+    //Response Message
+    string result = "";
+
+    //Button Active Check
+    bool editActive = false;
+    bool deleteActive = false;
+
+    //Search Bar String
+    string _searchString;
+
+
+    private Func<CityDto, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+
+        return false;
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
+        {
+            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
+        }
+        //Service Init
+        Client service = new Client("https://api.trawelin.com", _httpClient);
+        //Get Token From Service
+        var response = await _regionManager.GetCitiesByCountryIdAsync(int.Parse(id));
+        if (response.Succeeded == true)
+        {
+            cityList = response.Data.ToList();
+        }
+        else
+        {
+            result = response.Error.Message;
+        }
+    }
+
+
+    void SelectedItemsChanged(HashSet<CityDto> items)
+    {
+        selectedItems = items.ToList();
+
+        editActive = selectedItems.Count == 1;
+        deleteActive = selectedItems.Count > 0;
+    }
+
+
+
+    async Task DeleteButton()
+    {
+        CityDto cityDto = selectedItems[0];
+        var parameters = new DialogParameters { ["cityDto"] = cityDto };
+
+        var dialog = DialogService.Show<DeleteCityDialog>("Delete City", parameters);
+        var result = await dialog.Result;
+        CityDto modalData = result.Data as CityDto;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                var response = await _regionManager.DeleteCityAsync(modalData.Id);
+                if (response.Succeeded)
+                {
+
+                    _mudTable.SetSelectedItemAsync(cityDto);
+                    cityList.Remove(cityDto);
+                    Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+    async Task EditButton()
+    {
+        CityDto cityDto = selectedItems[0];
+        UpdateCityCommand updateCityCommand = _mapper.Map<UpdateCityCommand>(cityDto);
+        var parameters = new DialogParameters { ["updateCityCommand"] = updateCityCommand };
+
+        var dialog = DialogService.Show<EditCityDialog>("Edit City", parameters);
+        var result = await dialog.Result;
+        UpdateCityCommand modalData = result.Data as UpdateCityCommand;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                var response = await _regionManager.UpdateCityAsync(modalData);
+                if (response.Succeeded)
+                {
+                    cityList.Remove(cityDto);
+                    cityList.Add(response.Data);
+                    _mudTable.SetSelectedItemAsync(cityDto);
+                    Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+    async Task CreateButton()
+    {
+        CreateCityCommand city = new();
+        city.CountryId = int.Parse(id);
+        var parameters = new DialogParameters { ["createCityCommand"] = city };
+
+        var dialog = DialogService.Show<CreateCityDialog>("Create City", parameters);
+        var result = await dialog.Result;
+
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                CreateCityCommand createCityCommand = result.Data as CreateCityCommand;
+                CityDto countryDto = _mapper.Map<CityDto>(createCityCommand);
+                var response = await _regionManager.CreateCityAsync(createCityCommand);
+                if (response.Succeeded)
+                {
+                    if (response.Succeeded)
+                    {
+                        cityList.Add(response.Data);
+                        Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                    }
+                    else
+                    {
+                        Console.Write(response.Error.Message);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+    async Task GoToDistrictButton()
+    {
+        _navigationManager.NavigateTo("districtdefinition" + "/" + selectedItems[0].Id);
+
+    }
+
+}

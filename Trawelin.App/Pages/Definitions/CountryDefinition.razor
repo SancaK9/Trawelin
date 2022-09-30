@@ -1,0 +1,219 @@
+﻿@page "/countryDefinition"
+@using AutoMapper
+@using Trawelin.App.Infrastructure.Constants.Storage
+@using Trawelin.App.Shared.Definitions.Regions.Country
+@using Trawelin.App.Shared.Users
+@inject IDialogService DialogService
+@inject IMapper _mapper
+
+
+
+<MudDataGrid T="CountryDto" @ref="_mudTable" MultiSelection="true" ColumnResizeMode="ResizeMode.Column" Items="@countryList" SortMode="SortMode.Multiple" Filterable="true"
+             QuickFilter="@_quickFilter" Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" Striped="true" Bordered="true">
+    <ToolBarContent>
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Ekle</MudButton>
+
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Sil</MudButton>
+
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">Duzenle</MudButton>
+
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="GoToCityButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.ArrowRight" Color="Color.Info">Sehre Git</MudButton>
+
+
+        <MudSpacer />
+        <MudText Typo="Typo.h4">Ulkeler</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Ara" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="CountryDto" />
+        <Column T="CountryDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
+
+        <Column T="CountryDto" Field="Name" Title="Ulke" Sortable="false" Filterable="false" IsEditable="false" />
+
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="CountryDto" />
+    </PagerContent>
+</MudDataGrid>
+
+
+@code {
+    //DataGrid Table
+    private MudDataGrid<CountryDto> _mudTable;
+    //DataGrid Data
+    private List<CountryDto> countryList = new List<CountryDto>();
+    private List<CountryDto> selectedItems;
+    //Response Message
+    string result = "";
+
+    //Button Active Check
+    bool editActive = false;
+    bool deleteActive = false;
+
+    //Search Bar String
+    string _searchString;
+
+    //QuickFilter Function
+    private Func<CountryDto, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.Code.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+
+        return false;
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
+        {
+            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
+        }
+
+        //Service Init
+        Client service = new Client("https://api.trawelin.com", _httpClient);
+        //Get Token From Service
+        var response = await _regionManager.GetCountryAsync();
+        if (response.Succeeded == true)
+        {
+            countryList = response.Data.ToList();
+        }
+        else
+        {
+            result = response.Error.Message;
+        }
+    }
+
+
+    void SelectedItemsChanged(HashSet<CountryDto> items)
+    {
+        selectedItems = items.ToList();
+
+        editActive = selectedItems.Count == 1;
+        deleteActive = selectedItems.Count > 0;
+    }
+
+
+
+    async Task DeleteButton()
+    {
+        CountryDto countryDto = selectedItems[0];
+        var parameters = new DialogParameters { ["countryDto"] = countryDto };
+
+        var dialog = DialogService.Show<DeleteCountryDialog>("Delete Country", parameters);
+        var result = await dialog.Result;
+        CountryDto modalData = result.Data as CountryDto;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                var response = await _regionManager.DeleteCountryAsync(modalData.Id);
+
+
+
+
+                if (response.Succeeded)
+                {
+                    _mudTable.SetSelectedItemAsync(countryDto);
+
+                    bool deleteResult = countryList.Remove(countryDto);
+                    Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                }
+                else
+                {
+                    Snackbar.Add(response.Error.Message, Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+    async Task EditButton()
+    {
+        CountryDto dto = selectedItems[0];
+        UpdateCountryCommand updateCountryCommand = _mapper.Map<UpdateCountryCommand>(dto);
+
+        var parameters = new DialogParameters { ["updateCountryCommand"] = updateCountryCommand };
+
+        var dialog = DialogService.Show<EditCountryDialog>("Edit Country", parameters);
+        var result = await dialog.Result;
+        UpdateCountryCommand modalData = result.Data as UpdateCountryCommand;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                var response = await _regionManager.UpdateCountryAsync(modalData);
+                if (response.Succeeded)
+                {
+                    countryList.Remove(dto);
+                    countryList.Add(response.Data);
+                    _mudTable.SetSelectedItemAsync(dto);
+                    Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                }
+                else
+                {
+                    Snackbar.Add(response.Error.Message, Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+    async Task CreateButton()
+    {
+        var parameters = new DialogParameters { };
+
+        var dialog = DialogService.Show<CreateCountryDialog>("Create Country", parameters);
+        var result = await dialog.Result;
+
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                CreateCountryCommand createCountryCommand = result.Data as CreateCountryCommand;
+                CountryDto countryDto = _mapper.Map<CountryDto>(createCountryCommand);
+                var response = await _regionManager.CreateCountryAsync(createCountryCommand);
+                if (response.Succeeded)
+                {
+                    Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                    countryList.Add(response.Data);
+                }
+                else
+                {
+                    Snackbar.Add(response.Error.Message, Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+    async Task GoToCityButton()
+    {
+        _navigationManager.NavigateTo("citydefinition" + "/" + selectedItems[0].Id);
+
+    }
+
+}
