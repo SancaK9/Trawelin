@@ -13,13 +13,11 @@ namespace Trawelin.App.Infrastructure.Managers.Definitions.Suppliers
     public class SuppliersManager : ISuppliersManager
     {
         private readonly HttpClient _httpClient;
-        private readonly ILocalStorageService _localStorage;
 
 
-        public SuppliersManager(HttpClient httpClient, ILocalStorageService localStorage)
+        public SuppliersManager(HttpClient httpClient)
         {
             this._httpClient = httpClient;
-            this._localStorage = localStorage;
 
         }
 

@@ -1,0 +1,39 @@
+﻿
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Delete" Class="mr-3 mb-n1" />
+            Delete Accomodation?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@roomAccomodationTypeDto.Id" Label="Id" ReadOnly="true" />
+        <MudTextField @bind-Value="@roomAccomodationTypeDto.Name" Label="Isim" />
+      
+        <MudTextField @bind-Value="@roomAccomodationTypeDto.MinAdult" Label="MinAdult" />
+        <MudTextField @bind-Value="@roomAccomodationTypeDto.MaxAdult" Label="MaxAdult" />
+        <MudTextField @bind-Value="@roomAccomodationTypeDto.MinChildren" Label="MinChildren" />
+        <MudTextField @bind-Value="@roomAccomodationTypeDto.MaxChildren" Label="MaxChildren" />
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteCountry">Sil</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public RoomAccomodationTypeDto roomAccomodationTypeDto { get; set; } = new RoomAccomodationTypeDto();
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void DeleteCountry()
+    {
+        MudDialog.Close(DialogResult.Ok(roomAccomodationTypeDto));
+    }
+}

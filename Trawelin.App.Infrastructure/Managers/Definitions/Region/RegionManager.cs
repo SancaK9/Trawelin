@@ -14,13 +14,12 @@ namespace Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
     {
 
         private readonly HttpClient _httpClient;
-        private readonly ILocalStorageService _localStorage;
+    
 
 
-        public RegionManager(HttpClient httpClient, ILocalStorageService localStorage)
+        public RegionManager(HttpClient httpClient)
         {
             this._httpClient = httpClient;
-            this._localStorage = localStorage;
 
         }
         #region Country

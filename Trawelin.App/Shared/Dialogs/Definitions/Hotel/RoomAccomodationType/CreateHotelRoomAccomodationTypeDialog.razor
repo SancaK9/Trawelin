@@ -1,0 +1,37 @@
+﻿
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Create" Class="mr-3 mb-n1" />
+            Create Room Accomodation?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@createRoomAccomodationTypeCommand.Name" Label="Isim" />
+
+        <MudTextField @bind-Value="@createRoomAccomodationTypeCommand.MinAdult" Label="MinAdult" />
+        <MudTextField @bind-Value="@createRoomAccomodationTypeCommand.MaxAdult" Label="MaxAdult" />
+        <MudTextField @bind-Value="@createRoomAccomodationTypeCommand.MinChildren" Label="MinChildren" />
+        <MudTextField @bind-Value="@createRoomAccomodationTypeCommand.MaxChildren" Label="MaxChildren" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Success" OnClick="CreateCountry">Ekle</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    public CreateRoomAccomodationTypeCommand createRoomAccomodationTypeCommand { get; set; } = new CreateRoomAccomodationTypeCommand();
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void CreateCountry()
+    {
+        MudDialog.Close(DialogResult.Ok(createRoomAccomodationTypeCommand));
+    }
+}

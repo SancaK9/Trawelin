@@ -14,13 +14,13 @@ namespace Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Categories
     {
 
         private readonly HttpClient _httpClient;
-        private readonly ILocalStorageService _localStorage;
 
 
-        public HotelCategoriesManager(HttpClient httpClient, ILocalStorageService localStorage)
+
+        public HotelCategoriesManager(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _localStorage = localStorage;
+
 
         }
 

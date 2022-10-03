@@ -10,6 +10,7 @@ using Trawelin.App.Infrastructure.Managers.Definitions.Suppliers;
 using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Categories;
 using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Types;
 using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Accomodations;
+using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.RoomAccomodationTypes;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -27,6 +28,7 @@ builder.Services.AddScoped<ISuppliersManager, SuppliersManager>();
 builder.Services.AddScoped<IHotelCategoriesManager, HotelCategoriesManager>();
 builder.Services.AddScoped<IHotelTypesManager, HotelTypesManager>();
 builder.Services.AddScoped<IHotelAccomodationManager, HotelAccomodationManager>();
+builder.Services.AddScoped<IHotelRoomAccomodationTypeManager, HotelRoomAccomodationTypeManager>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

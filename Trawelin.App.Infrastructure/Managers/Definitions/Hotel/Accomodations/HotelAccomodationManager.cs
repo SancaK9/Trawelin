@@ -14,13 +14,11 @@ namespace Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Accomodations
     {
 
         private readonly HttpClient _httpClient;
-        private readonly ILocalStorageService _localStorage;
 
 
-        public HotelAccomodationManager(HttpClient httpClient, ILocalStorageService localStorage)
+        public HotelAccomodationManager(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _localStorage = localStorage;
 
         }
         public async Task<AccomodationDtoServiceResult> CreateAccomodationAsync(CreateAccomodationCommand createAccomodationCommand)
