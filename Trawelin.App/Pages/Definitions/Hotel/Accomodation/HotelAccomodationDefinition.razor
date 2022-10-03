@@ -1,0 +1,183 @@
+﻿@page "/hotelAccomodation"
+@using Trawelin.App.Shared.Dialogs.Definitions.Hotel.Accomodations
+
+
+<MudDataGrid T="AccomodationDto" @ref="_mudTable" MultiSelection="true" Items="@accomodationList" SortMode="SortMode.Multiple" Filterable="true"
+             QuickFilter="@_quickFilter" Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" Striped="true" Bordered="true">
+    <ToolBarContent>
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Ekle</MudButton>
+
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Sil</MudButton>
+
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">Duzenle</MudButton>
+
+        <MudSpacer />
+        <MudText Typo="Typo.h4">Hotel Accomodation</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Ara" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="AccomodationDto" />
+        <Column T="AccomodationDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
+
+        <Column T="AccomodationDto" Field="Name" Title="Name" Sortable="false" Filterable="false" IsEditable="false" />
+
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="AccomodationDto" />
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    //DataGrid Table
+    private MudDataGrid<AccomodationDto> _mudTable;
+    //DataGrid Data
+    private List<AccomodationDto> accomodationList = new List<AccomodationDto>();
+    private List<AccomodationDto> selectedItems;
+    //Response Message
+    string result = "";
+
+    //Button Active Check
+    bool editActive = false;
+    bool deleteActive = false;
+
+    //Search Bar String
+    string _searchString;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Service Init
+        Client service = new Client("https://api.trawelin.com", _httpClient);
+        //Get Token From Service
+        var response = await _hotelAccomodationManager.GetAccomodationAsync();
+        if (response.Succeeded == true)
+        {
+            accomodationList = response.Data.ToList();
+        }
+        else
+        {
+            result = response.Error.Message;
+        }
+    }
+
+
+    private Func<AccomodationDto, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+
+        return false;
+    };
+
+
+
+    void SelectedItemsChanged(HashSet<AccomodationDto> items)
+    {
+        selectedItems = items.ToList();
+
+        editActive = selectedItems.Count == 1;
+        deleteActive = selectedItems.Count > 0;
+    }
+
+
+
+    async Task DeleteButton()
+    {
+        AccomodationDto accomodationDto = selectedItems[0];
+        var parameters = new DialogParameters { ["accomodationDto"] = accomodationDto };
+
+        var dialog = DialogService.Show<DeleteHotelAccomodationDialog>("Delete Accomodation", parameters);
+        var result = await dialog.Result;
+        AccomodationDto modalData = result.Data as AccomodationDto;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                var response = await _hotelAccomodationManager.DeleteAccomodationAsync(modalData.Id);
+                if (response.Succeeded)
+                {
+
+                    _mudTable.SetSelectedItemAsync(accomodationDto);
+                    accomodationList.Remove(accomodationDto);
+                    Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+    async Task EditButton()
+    {
+        AccomodationDto accomodationDto = selectedItems[0];
+        UpdateAccomodationCommand updateAccomodationCommand = _mapper.Map<UpdateAccomodationCommand>(accomodationDto);
+        var parameters = new DialogParameters { ["updateAccomodationCommand"] = updateAccomodationCommand };
+
+        var dialog = DialogService.Show<EditHotelAccomodationDialog>("Edit Accomodation", parameters);
+        var result = await dialog.Result;
+        UpdateAccomodationCommand modalData = result.Data as UpdateAccomodationCommand;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                var response = await _hotelAccomodationManager.UpdateAccomodationAsync(modalData);
+                if (response.Succeeded)
+                {
+                    accomodationList.Remove(accomodationDto);
+                    accomodationList.Add(response.Data);
+                    _mudTable.SetSelectedItemAsync(accomodationDto);
+                    Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+    async Task CreateButton()
+    {
+
+        var dialog = DialogService.Show<CreateHotelAccomodationDialog>("Create Accomodation");
+        var result = await dialog.Result;
+
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                CreateAccomodationCommand createAccomodationCommand = result.Data as CreateAccomodationCommand;
+                var response = await _hotelAccomodationManager.CreateAccomodationAsync(createAccomodationCommand);
+                if (response.Succeeded)
+                {
+                    if (response.Succeeded)
+                    {
+                        accomodationList.Add(response.Data);
+                        Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                    }
+                    else
+                    {
+                        Console.Write(response.Error.Message);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+}
