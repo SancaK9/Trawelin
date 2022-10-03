@@ -1,0 +1,33 @@
+﻿
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3 mb-n1" />
+            Edit Hotel Type?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@updateHotelTypeCommand.Id" Label="Id" ReadOnly="true"/>
+        <MudTextField @bind-Value="@updateHotelTypeCommand.Name" Label="Isim" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Info" OnClick="EditCountry">Ekle</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public UpdateHotelTypeCommand updateHotelTypeCommand { get; set; } = new UpdateHotelTypeCommand();
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void EditCountry()
+    {
+        MudDialog.Close(DialogResult.Ok(updateHotelTypeCommand));
+    }
+}

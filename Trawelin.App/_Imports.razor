@@ -1,5 +1,7 @@
-﻿@using System.Net.Http
+﻿@using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Categories
+@using System.Net.Http
 @using System.Net.Http.Json
+@using AutoMapper
 @using Blazored.LocalStorage
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
@@ -10,13 +12,16 @@
 @using Microsoft.JSInterop
 @using MudBlazor
 @using Trawelin.App
+@using Trawelin.App.Infrastructure.Managers.Definitions.Hotel
+@using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Types
+@using Trawelin.App.Infrastructure.Managers.Definitions.Suppliers
 @using Trawelin.App.Infrastructure.Managers.Identity.Authentication
 @using Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
 @using Trawelin.App.Infrastructure.Managers.Identity.Users
 @using Trawelin.App.Shared
 @using Trawelin.App.Infrastructure
 @using Trawelin.App.Infrastructure.ServiceApi
-
+@using Trawelin.App.Infrastructure.Constants.Storage
 
 @attribute [Authorize]
 @inject HttpClient _httpClient
@@ -24,10 +29,16 @@
 
 @inject IJSRuntime _jsRuntime;
 
+@inject IMapper _mapper
 @inject IAuthenticationManager _authenticationManager
 @inject ILocalStorageService _localStorage;
-
+@inject IDialogService DialogService
+@*Managers Init*@
 @inject IUserManager _userManager
 @inject IRegionManager _regionManager
+@inject ISuppliersManager _suppliersManager
+@inject IHotelCategoriesManager _hotelCategoriesManager
+@inject IHotelTypesManager _hotelTypeManager
 
+@*SnackBar*@
 @inject ISnackbar Snackbar

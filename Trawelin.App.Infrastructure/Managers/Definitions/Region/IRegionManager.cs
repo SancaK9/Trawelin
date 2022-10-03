@@ -11,7 +11,7 @@ namespace Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
     {
         //Country
         Task<CountryDtoListServiceResult> GetCountryAsync();
-        Task<CountryDtoServiceResult> GetCountryById(int id);
+        Task<CountryDtoServiceResult> GetCountryByIdAsync(int id);
         Task<CountryDtoServiceResult> CreateCountryAsync(CreateCountryCommand createCountryCommand);
         Task<CountryDtoServiceResult> DeleteCountryAsync(int id);
         Task<CountryDtoServiceResult> UpdateCountryAsync(UpdateCountryCommand updateCountryCommand);
@@ -19,7 +19,7 @@ namespace Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
         //City
         Task<CityDtoListServiceResult> GetCitiesAsync();
         Task<CityDtoListServiceResult> GetCitiesByCountryIdAsync(int countryId);
-        Task<CityDtoServiceResult> GetCityById(int id);
+        Task<CityDtoServiceResult> GetCityByIdAsync(int id);
         Task<CityDtoServiceResult> CreateCityAsync(CreateCityCommand createCityCommand);
         Task<CityDtoServiceResult> DeleteCityAsync(int id);
         Task<CityDtoServiceResult> UpdateCityAsync(UpdateCityCommand updateCityCommand);
@@ -27,7 +27,7 @@ namespace Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
         //District
         Task<DistrictDtoListServiceResult> GetDistrictAsync();
         Task<DistrictDtoListServiceResult> GetDistrictByCityIdAsync(int cityId);
-        Task<DistrictDtoServiceResult> GetDistrictById(int id);
+        Task<DistrictDtoServiceResult> GetDistrictByIdAsync(int id);
         Task<DistrictDtoServiceResult> CreateDistrictAsync(CreateDistrictCommand createDistrictCommand);
         Task<DistrictDtoServiceResult> DeleteDistrictAsync(int id);
         Task<DistrictDtoServiceResult> UpdateDistrictAsync(UpdateDistrictCommand updateDistrictCommand);
@@ -35,7 +35,7 @@ namespace Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
         //Village
         Task<VillageDtoListServiceResult> GetVillageAsync();
         Task<VillageDtoListServiceResult> GetVillageByDistrictIdAsync(int districtId);
-        Task<VillageDtoServiceResult> GetVillageById(int id);
+        Task<VillageDtoServiceResult> GetVillageByIdAsync(int id);
         Task<VillageDtoServiceResult> CreateVillageAsync(CreateVillageCommand createVillageCommand);
         Task<VillageDtoServiceResult> DeleteVillageAsync(int id);
         Task<VillageDtoServiceResult> UpdateVillageAsync(UpdateVillageCommand updateVillageCommand);

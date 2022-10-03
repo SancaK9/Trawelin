@@ -1,12 +1,8 @@
-﻿@page "/districtdefinition/{id}"
-@using AutoMapper
-@using Trawelin.App.Infrastructure.Constants.Storage
-@using Trawelin.App.Shared.Definitions.Regions.District
-@inject IDialogService DialogService
-@inject IMapper _mapper
+﻿@page "/villageDefinition/{id}"
+@using Trawelin.App.Shared.Dialogs.Definitions.Regions.Village
 
 
-<MudDataGrid T="DistrictDto" @ref="_mudTable" MultiSelection="true" Items="@districtList" SortMode="SortMode.Multiple" Filterable="true"
+<MudDataGrid T="VillageDto" @ref="_mudTable" MultiSelection="true" Items="@villageList" SortMode="SortMode.Multiple" Filterable="true"
              QuickFilter="@_quickFilter" Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" Striped="true" Bordered="true">
     <ToolBarContent>
         <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Ekle</MudButton>
@@ -15,27 +11,23 @@
 
         <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">Duzenle</MudButton>
 
-        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="GoToVillageButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.ArrowRight" Color="Color.Info">Semte Git</MudButton>
-
 
         <MudSpacer />
-        <MudText Typo="Typo.h4">Ilceler</MudText>
+        <MudText Typo="Typo.h4">Semtler</MudText>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Ara" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <Columns>
-        <SelectColumn T="DistrictDto" />
-        <Column T="DistrictDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
+        <SelectColumn T="VillageDto" />
+        <Column T="VillageDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
 
-        <Column T="DistrictDto" Field="Name" Title="Ulke" Sortable="false" Filterable="false" IsEditable="false" />
-
+        <Column T="VillageDto" Field="Name" Title="Ulke" Sortable="false" Filterable="false" IsEditable="false" />
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="DistrictDto" />
+        <MudDataGridPager T="VillageDto" />
     </PagerContent>
 </MudDataGrid>
-
 
 
 @code {
@@ -43,10 +35,10 @@
     public string id { get; set; }
 
     //DataGrid Table
-    private MudDataGrid<DistrictDto> _mudTable;
+    private MudDataGrid<VillageDto> _mudTable;
     //DataGrid Data
-    private List<DistrictDto> districtList = new List<DistrictDto>();
-    private List<DistrictDto> selectedItems;
+    private List<VillageDto> villageList = new List<VillageDto>();
+    private List<VillageDto> selectedItems;
     //Response Message
     string result = "";
 
@@ -58,7 +50,7 @@
     string _searchString;
 
 
-    private Func<DistrictDto, bool> _quickFilter => x =>
+    private Func<VillageDto, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
@@ -66,23 +58,18 @@
         if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-
         return false;
     };
 
     protected override async Task OnInitializedAsync()
     {
-        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
-        {
-            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
-        }
         //Service Init
         Client service = new Client("https://api.trawelin.com", _httpClient);
         //Get Token From Service
-        var response = await _regionManager.GetDistrictByCityIdAsync(int.Parse(id));
+        var response = await _regionManager.GetVillageByDistrictIdAsync(int.Parse(id));
         if (response.Succeeded == true)
         {
-            districtList = response.Data.ToList();
+            villageList = response.Data.ToList();
         }
         else
         {
@@ -91,8 +78,9 @@
     }
 
 
-    void SelectedItemsChanged(HashSet<DistrictDto> items)
+    void SelectedItemsChanged(HashSet<VillageDto> items)
     {
+
         selectedItems = items.ToList();
 
         editActive = selectedItems.Count == 1;
@@ -103,23 +91,23 @@
 
     async Task DeleteButton()
     {
-        DistrictDto districtDto = selectedItems[0];
-        var parameters = new DialogParameters { ["districtDto"] = districtDto };
+        VillageDto villageDto = selectedItems[0];
+        var parameters = new DialogParameters { ["villageDto"] = villageDto };
 
-        var dialog = DialogService.Show<DeleteDistrictDialog>("Delete District", parameters);
+        var dialog = DialogService.Show<DeleteVillageDialog>("Delete Village", parameters);
         var result = await dialog.Result;
+        VillageDto modalData = result.Data as VillageDto;
 
-        DistrictDto modalData = result.Data as DistrictDto;
         if (!result.Cancelled)
         {
             try
             {
-                var response = await _regionManager.DeleteDistrictAsync(modalData.Id);
+                var response = await _regionManager.DeleteVillageAsync(modalData.Id);
                 if (response.Succeeded)
                 {
 
-                    _mudTable.SetSelectedItemAsync(districtDto);
-                    districtList.Remove(districtDto);
+                    _mudTable.SetSelectedItemAsync(villageDto);
+                    villageList.Remove(villageDto);
                     Snackbar.Add("Isleminiz Basarili", Severity.Success);
                 }
             }
@@ -133,25 +121,24 @@
 
     async Task EditButton()
     {
-        DistrictDto districtDto = selectedItems[0];
+        VillageDto villageDto = selectedItems[0];
+        UpdateVillageCommand updateVillageCommand = _mapper.Map<UpdateVillageCommand>(villageDto);
+        var parameters = new DialogParameters { ["updateVillageCommand"] = updateVillageCommand };
 
-        UpdateDistrictCommand updateDistrictCommand = _mapper.Map<UpdateDistrictCommand>(districtDto);
-        var parameters = new DialogParameters { ["updateDistrictCommand"] = updateDistrictCommand };
-
-        var dialog = DialogService.Show<EditDistrictDialog>("Edit District", parameters);
+        var dialog = DialogService.Show<EditVillageDialog>("Edit Village", parameters);
         var result = await dialog.Result;
-        UpdateDistrictCommand modalData = result.Data as UpdateDistrictCommand;
+        UpdateVillageCommand modalData = result.Data as UpdateVillageCommand;
 
         if (!result.Cancelled)
         {
             try
             {
-                var response = await _regionManager.UpdateDistrictAsync(updateDistrictCommand);
+                var response = await _regionManager.UpdateVillageAsync(modalData);
                 if (response.Succeeded)
                 {
-                    districtList.Remove(districtDto);
-                    districtList.Add(response.Data);
-                    _mudTable.SetSelectedItemAsync(districtDto);
+                    villageList.Remove(villageDto);
+                    villageList.Add(response.Data);
+                    _mudTable.SetSelectedItemAsync(villageDto);
                     Snackbar.Add("Isleminiz Basarili", Severity.Success);
                 }
             }
@@ -165,11 +152,11 @@
 
     async Task CreateButton()
     {
-        CreateDistrictCommand district = new();
-        district.CityId = int.Parse(id);
-        var parameters = new DialogParameters { ["createDistrictCommand"] = district };
+        CreateVillageCommand village = new();
+        village.DistrictId = int.Parse(id);
+        var parameters = new DialogParameters { ["createVillageCommand"] = village };
 
-        var dialog = DialogService.Show<CreateDistrictDialog>("Create District", parameters);
+        var dialog = DialogService.Show<CreateVillageDialog>("Create Village", parameters);
         var result = await dialog.Result;
 
 
@@ -177,14 +164,14 @@
         {
             try
             {
-                CreateDistrictCommand createDistrictCommand = result.Data as CreateDistrictCommand;
-                DistrictDto districtDto = _mapper.Map<DistrictDto>(createDistrictCommand);
-                var response = await _regionManager.CreateDistrictAsync(createDistrictCommand);
+                CreateVillageCommand createVillageCommand = result.Data as CreateVillageCommand;
+                VillageDto villageDto = _mapper.Map<VillageDto>(createVillageCommand);
+                var response = await _regionManager.CreateVillageAsync(createVillageCommand);
                 if (response.Succeeded)
                 {
                     if (response.Succeeded)
                     {
-                        districtList.Add(response.Data);
+                        villageList.Add(response.Data);
                         Snackbar.Add("Isleminiz Basarili", Severity.Success);
                     }
                     else
@@ -201,10 +188,6 @@
 
     }
 
-    async Task GoToVillageButton()
-    {
-        _navigationManager.NavigateTo("villagedefinition" + "/" + selectedItems[0].Id);
 
-    }
 
 }

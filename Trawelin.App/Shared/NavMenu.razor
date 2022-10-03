@@ -11,11 +11,11 @@
 
         <MudNavGroup Title="Tanimlamalar" Icon="@Icons.Material.Filled.Settings" Expanded="false">
             <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/countryDefinition">Bolgeler</MudNavLink>
-            <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/regions">Kategoriler</MudNavLink>
+            <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelCategories">Kategoriler</MudNavLink>
             <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/regions">Oda/Konaklama Sekli</MudNavLink>
             <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/regions">Oda Tipleri</MudNavLink>
             <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/regions">Pansiyonlar</MudNavLink>
-            <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/regions">Otel Tipleri</MudNavLink>
+            <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelTypes">Otel Tipleri</MudNavLink>
         </MudNavGroup>
 
         <MudNavLink Icon="@Icons.Material.Filled.Monitor" Href="/hotel">Stop / Free Sale Monitoru</MudNavLink>
@@ -24,5 +24,20 @@
 
     <MudNavGroup Title="Ayarlar" Icon="@Icons.Material.Filled.Settings" Expanded="false">
         <MudNavLink Icon="@Icons.Material.Filled.SupervisedUserCircle" Href="/users">Kullanicilar</MudNavLink>
+
+        <MudNavLink Icon="@Icons.Material.Filled.SettingsAccessibility" Href="/suppliersdefinition">Tedarikci Tanimlama</MudNavLink>
     </MudNavGroup>
 </MudNavMenu>
+
+@code {
+    private string Username { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
+        {
+            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
+        }
+        Username = await _localStorage.GetItemAsync<string>(StorageConstants.Local.userUsername);
+    }
+}

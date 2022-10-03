@@ -12,12 +12,15 @@ namespace Trawelin.App.Infrastructure.Constants.Storage
 
             public static string baseUrl = "https://api.trawelin.com";
 
-
             public static string AuthToken = "AuthToken";
-
 
             public static string headerName = "Authorization";
 
+
+            //Users
+            public static string userId = "X-Id";
+            public static string userUsername = "X-Username";
+            public static string userEmail = "X-Email";
         }
 
     }

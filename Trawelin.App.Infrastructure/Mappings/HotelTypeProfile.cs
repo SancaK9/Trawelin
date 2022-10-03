@@ -8,14 +8,14 @@ using Trawelin.App.Infrastructure.ServiceApi;
 
 namespace Trawelin.App.Infrastructure.Mappings
 {
-    public class UsersProfile : Profile
+    public class HotelTypeProfile : Profile
     {
-        public UsersProfile()
+
+        public HotelTypeProfile()
         {
-            CreateMap<ApplicationUserDto, CreateUserCommand>().ReverseMap();
+            CreateMap<HotelTypeDto, CreateHotelTypeCommand>().ReverseMap();
 
-            CreateMap<ApplicationUserDto, UpdateUserCommand>().ReverseMap();
+            CreateMap<HotelTypeDto, UpdateHotelTypeCommand>().ReverseMap();
         }
-
     }
 }

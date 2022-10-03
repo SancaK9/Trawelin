@@ -1,20 +1,19 @@
 ﻿@page "/users"
-@using AutoMapper
-@using Trawelin.App.Infrastructure.Constants.Storage
-@using Trawelin.App.Shared.Users
-@inject IDialogService DialogService
-@inject IMapper _mapper
+@using Trawelin.App.Shared.Dialogs.Users
 
 
 
-<MudButton Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Ekle</MudButton>
-<MudButton Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Sil</MudButton>
-<MudButton Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">Duzenle</MudButton>
+
 
 <MudDataGrid T="ApplicationUserDto" @ref="_mudTable" MultiSelection="true" Items="@UserList" SortMode="SortMode.Multiple" Filterable="true"
              Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" QuickFilter="@_quickFilter" Striped="true" Bordered="true">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Kullanicilar</MudText>
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Ekle</MudButton>
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Sil</MudButton>
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">Duzenle</MudButton>
+
+        <MudSpacer />
+        <MudText Typo="Typo.h4">Kullanicilar</MudText>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Ara" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -64,10 +63,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
-        {
-            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
-        }
         //Service Init
         Client service = new Client("https://api.trawelin.com", _httpClient);
         //Get Token From Service
@@ -142,7 +137,7 @@
             {
                 UpdateUserCommand updateUserCommand = new();
                 updateUserCommand.Id = dto.Id;
-                updateUserCommand.Username = test.UserName;
+                updateUserCommand.UserName = test.UserName;
                 var response = await _userManager.UpdateUserAsync(updateUserCommand);
                 if (response.Succeeded)
                 {

@@ -1,0 +1,35 @@
+﻿
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Delete" Class="mr-3 mb-n1" />
+            Delete Supplier?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@supplierDto.Id" Label="Id" ReadOnly="true" />
+        <MudTextField @bind-Value="@supplierDto.Title" Label="Isim" />
+        <MudTextField @bind-Value="@supplierDto.TaxNum" Label="Vergi No" />
+        <MudTextField @bind-Value="@supplierDto.Address" Label="Adres" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteSupplier">Sil</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public SupplierDto supplierDto { get; set; } = new SupplierDto();
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void DeleteSupplier()
+    {
+        MudDialog.Close(DialogResult.Ok(supplierDto));
+    }
+}

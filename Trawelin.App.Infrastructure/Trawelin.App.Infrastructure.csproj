@@ -15,8 +15,4 @@
     <PackageReference Include="Toolbelt.Blazor.HttpClientInterceptor" Version="10.1.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Managers\Interceptors\" />
-  </ItemGroup>
-
 </Project>

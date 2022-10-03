@@ -1,12 +1,5 @@
 ﻿@page "/countryDefinition"
-@using AutoMapper
-@using Trawelin.App.Infrastructure.Constants.Storage
-@using Trawelin.App.Shared.Definitions.Regions.Country
-@using Trawelin.App.Shared.Users
-@inject IDialogService DialogService
-@inject IMapper _mapper
-
-
+@using Trawelin.App.Shared.Dialogs.Definitions.Regions.Country
 
 <MudDataGrid T="CountryDto" @ref="_mudTable" MultiSelection="true" ColumnResizeMode="ResizeMode.Column" Items="@countryList" SortMode="SortMode.Multiple" Filterable="true"
              QuickFilter="@_quickFilter" Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" Striped="true" Bordered="true">
@@ -73,10 +66,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
-        {
-            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
-        }
 
         //Service Init
         Client service = new Client("https://api.trawelin.com", _httpClient);

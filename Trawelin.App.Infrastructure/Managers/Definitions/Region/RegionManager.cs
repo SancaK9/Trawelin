@@ -46,7 +46,7 @@ namespace Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
             return response;
         }
 
-        public async Task<CountryDtoServiceResult> GetCountryById(int id)
+        public async Task<CountryDtoServiceResult> GetCountryByIdAsync(int id)
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
             var response = await service.ApiCountriesGetAsync(id);
@@ -89,7 +89,7 @@ namespace Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
             return response;
         }
 
-        public async Task<CityDtoServiceResult> GetCityById(int id)
+        public async Task<CityDtoServiceResult> GetCityByIdAsync(int id)
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
             var response = await service.ApiCitiesGetAsync(id);
@@ -136,7 +136,7 @@ namespace Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
             return response;
         }
 
-        public async Task<DistrictDtoServiceResult> GetDistrictById(int id)
+        public async Task<DistrictDtoServiceResult> GetDistrictByIdAsync(int id)
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
             var response = await service.ApiDistrictsGetAsync(id);
@@ -176,7 +176,7 @@ namespace Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
             return response;
         }
 
-        public async Task<VillageDtoServiceResult> GetVillageById(int id)
+        public async Task<VillageDtoServiceResult> GetVillageByIdAsync(int id)
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
             var response = await service.ApiVillagesGetAsync(id);

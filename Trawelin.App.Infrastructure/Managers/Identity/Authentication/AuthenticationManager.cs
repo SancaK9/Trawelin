@@ -36,7 +36,11 @@ namespace Trawelin.App.Infrastructure.Managers.Identity.Authentication
                 var token = response.Data.Token;
                 
                 await _localStorage.SetItemAsync(StorageConstants.Local.AuthToken, token);
-          
+
+                await _localStorage.SetItemAsync(StorageConstants.Local.userId, response.Data.User.Id);
+                await _localStorage.SetItemAsync(StorageConstants.Local.userUsername, response.Data.User.UserName);
+                await _localStorage.SetItemAsync(StorageConstants.Local.userEmail, response.Data.User.Email);
+
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 return response;

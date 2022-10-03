@@ -1,0 +1,155 @@
+﻿
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Create" Class="mr-3 mb-n1" />
+            Create Suppliers?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+
+        <MudAutocomplete @ref="@countryAuto" T="CountryDto" Label="Ulke Seciniz" SearchFunc="@SearchCountry"  ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnCountryValueChanged" />
+        <MudAutocomplete @ref="@cityAuto" T="CityDto" Label="Sehir Seciniz" SearchFunc="@SearchCity" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnCityValueChanged" />
+        <MudAutocomplete @ref="@districtAuto" T="DistrictDto" Label="Ilce Seciniz" SearchFunc="@SearchDistrict" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnDistrictValueChanged" />
+        <MudAutocomplete @ref="@villageAuto" T="VillageDto" Label="Semt Seciniz" SearchFunc="@SearchVillage" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnVillageValueChanged" />
+
+
+
+
+        <MudTextField @bind-Value="@createSupplierCommand.Title" Label="Baslik" />
+        <MudTextField @bind-Value="@createSupplierCommand.TaxNum" Label="Vergi Numarasi" />
+        <MudTextField @bind-Value="@createSupplierCommand.Address" Label="Adres" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Success" OnClick="CreateSupplier">Ekle</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudAutocomplete<CountryDto> countryAuto;
+    private MudAutocomplete<CityDto> cityAuto;
+    private MudAutocomplete<DistrictDto> districtAuto;
+    private MudAutocomplete<VillageDto> villageAuto;
+
+    [Parameter]
+    public EventCallback<CountryDto> CountryChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<CityDto> CityChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<DistrictDto> DistrictChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<VillageDto> VillageChanged { get; set; }
+
+
+
+    List<CountryDto> countryDtos { get; set; } = new List<CountryDto>();
+    List<CityDto> cityDtos { get; set; } = new List<CityDto>();
+    List<DistrictDto> districtDtos { get; set; } = new List<DistrictDto>();
+    List<VillageDto> villageDtos { get; set; } = new List<VillageDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Set Token If Header Null
+        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
+        {
+            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
+        }
+        //Service Init
+        Client service = new Client("https://api.trawelin.com", _httpClient);
+
+        var response = await _regionManager.GetCountryAsync();
+        if (response.Succeeded == true)
+        {
+            countryDtos = response.Data.ToList();
+        }
+    }
+    //
+    private async Task OnCountryValueChanged(CountryDto country)
+    {
+        CountryChanged.InvokeAsync(country);
+        cityAuto.Clear();
+        districtAuto.Clear();
+        villageAuto.Clear();
+
+        var result = await _regionManager.GetCitiesByCountryIdAsync(country.Id);
+        cityDtos = result.Data.ToList();
+        return;
+    }
+    private async Task OnCityValueChanged(CityDto city)
+    {
+        CityChanged.InvokeAsync(city);
+        districtAuto.Clear();
+        villageAuto.Clear();
+        var result = await _regionManager.GetDistrictByCityIdAsync(city.Id);
+        districtDtos = result.Data.ToList();
+        return;
+    }
+    private async Task OnDistrictValueChanged(DistrictDto district)
+    {
+        DistrictChanged.InvokeAsync(district);
+        villageAuto.Clear();
+        var result = await _regionManager.GetVillageByDistrictIdAsync(district.Id);
+        villageDtos = result.Data.ToList();
+        return;
+    }
+    private Task OnVillageValueChanged(VillageDto village)
+    {
+        VillageChanged.InvokeAsync(village);
+        createSupplierCommand.VillageId = village.Id;
+        return Task.CompletedTask;
+    }
+    //
+    private async Task<IEnumerable<CountryDto>> SearchCountry(string value)
+    {
+       
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return countryDtos;
+        return countryDtos.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private async Task<IEnumerable<CityDto>> SearchCity(string value)
+    {
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return cityDtos;
+        return cityDtos.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+    private async Task<IEnumerable<DistrictDto>> SearchDistrict(string value)
+    {
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return districtDtos;
+        return districtDtos.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+    private async Task<IEnumerable<VillageDto>> SearchVillage(string value)
+    {
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return villageDtos;
+        return villageDtos.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    public CreateSupplierCommand createSupplierCommand { get; set; } = new CreateSupplierCommand();
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void CreateSupplier()
+    {
+        MudDialog.Close(DialogResult.Ok(createSupplierCommand));
+    }
+}

@@ -1,0 +1,183 @@
+﻿@page "/hotelCategories"
+@using Trawelin.App.Shared.Dialogs.Definitions.Hotel.Categories
+
+
+<MudDataGrid T="CategoryDto" @ref="_mudTable" MultiSelection="true" Items="@categoryList" SortMode="SortMode.Multiple" Filterable="true"
+             QuickFilter="@_quickFilter" Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" Striped="true" Bordered="true">
+    <ToolBarContent>
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Ekle</MudButton>
+
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Sil</MudButton>
+
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">Duzenle</MudButton>
+
+        <MudSpacer />
+        <MudText Typo="Typo.h4">Kategoriler</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Ara" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="CategoryDto" />
+        <Column T="CategoryDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
+
+        <Column T="CategoryDto" Field="Name" Title="Name" Sortable="false" Filterable="false" IsEditable="false" />
+
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="CategoryDto" />
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    //DataGrid Table
+    private MudDataGrid<CategoryDto> _mudTable;
+    //DataGrid Data
+    private List<CategoryDto> categoryList = new List<CategoryDto>();
+    private List<CategoryDto> selectedItems;
+    //Response Message
+    string result = "";
+
+    //Button Active Check
+    bool editActive = false;
+    bool deleteActive = false;
+
+    //Search Bar String
+    string _searchString;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Service Init
+        Client service = new Client("https://api.trawelin.com", _httpClient);
+        //Get Token From Service
+        var response = await _hotelCategoriesManager.GetCategoryAsync();
+        if (response.Succeeded == true)
+        {
+            categoryList = response.Data.ToList();
+        }
+        else
+        {
+            result = response.Error.Message;
+        }
+    }
+
+
+    private Func<CategoryDto, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+
+        return false;
+    };
+
+
+
+    void SelectedItemsChanged(HashSet<CategoryDto> items)
+    {
+        selectedItems = items.ToList();
+
+        editActive = selectedItems.Count == 1;
+        deleteActive = selectedItems.Count > 0;
+    }
+
+
+
+    async Task DeleteButton()
+    {
+        CategoryDto categoryDto = selectedItems[0];
+        var parameters = new DialogParameters { ["categoryDto"] = categoryDto };
+
+        var dialog = DialogService.Show<DeleteHotelCategoriesDialog>("Delete Category", parameters);
+        var result = await dialog.Result;
+        CategoryDto modalData = result.Data as CategoryDto;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                var response = await _hotelCategoriesManager.DeleteCategoryAsync(modalData.Id);
+                if (response.Succeeded)
+                {
+
+                    _mudTable.SetSelectedItemAsync(categoryDto);
+                    categoryList.Remove(categoryDto);
+                    Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+    async Task EditButton()
+    {
+        CategoryDto categoryDto = selectedItems[0];
+        UpdateCategoryCommand updateCategoryCommand = _mapper.Map<UpdateCategoryCommand>(categoryDto);
+        var parameters = new DialogParameters { ["updateCategoryCommand"] = updateCategoryCommand };
+
+        var dialog = DialogService.Show<EditHotelCategoriesDialog>("Edit Category", parameters);
+        var result = await dialog.Result;
+        UpdateCategoryCommand modalData = result.Data as UpdateCategoryCommand;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                var response = await _hotelCategoriesManager.UpdateCategoryAsync(modalData);
+                if (response.Succeeded)
+                {
+                    categoryList.Remove(categoryDto);
+                    categoryList.Add(response.Data);
+                    _mudTable.SetSelectedItemAsync(categoryDto);
+                    Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+    async Task CreateButton()
+    {
+        
+        var dialog = DialogService.Show<CreateHotelCategoriesDialog>("Create Category");
+        var result = await dialog.Result;
+
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                CreateCategoryCommand createCategoryCommand = result.Data as CreateCategoryCommand;
+                var response = await _hotelCategoriesManager.CreateCategoryAsync(createCategoryCommand);
+                if (response.Succeeded)
+                {
+                    if (response.Succeeded)
+                    {
+                        categoryList.Add(response.Data);
+                        Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                    }
+                    else
+                    {
+                        Console.Write(response.Error.Message);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+}
