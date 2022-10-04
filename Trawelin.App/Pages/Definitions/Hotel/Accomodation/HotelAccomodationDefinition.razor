@@ -1,7 +1,10 @@
 ﻿@page "/hotelAccomodation"
 @using Trawelin.App.Shared.Dialogs.Definitions.Hotel.Accomodations
 
-
+@if (IsTaskRunning)
+{
+	<MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}else{
 <MudDataGrid T="AccomodationDto" @ref="_mudTable" MultiSelection="true" Items="@accomodationList" SortMode="SortMode.Multiple" Filterable="true"
              QuickFilter="@_quickFilter" Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" Striped="true" Bordered="true">
     <ToolBarContent>
@@ -28,6 +31,7 @@
         <MudDataGridPager T="AccomodationDto" />
     </PagerContent>
 </MudDataGrid>
+}
 
 @code {
     //DataGrid Table
@@ -44,13 +48,19 @@
 
     //Search Bar String
     string _searchString;
+    bool IsTaskRunning = true;
 
     protected override async Task OnInitializedAsync()
     {
+        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
+        {
+            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
+        }
         //Service Init
         Client service = new Client("https://api.trawelin.com", _httpClient);
         //Get Token From Service
         var response = await _hotelAccomodationManager.GetAccomodationAsync();
+        IsTaskRunning = false;
         if (response.Succeeded == true)
         {
             accomodationList = response.Data.ToList();
@@ -90,8 +100,8 @@
     {
         AccomodationDto accomodationDto = selectedItems[0];
         var parameters = new DialogParameters { ["accomodationDto"] = accomodationDto };
-
-        var dialog = DialogService.Show<DeleteHotelAccomodationDialog>("Delete Accomodation", parameters);
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<DeleteHotelAccomodationDialog>("Delete Accomodation", parameters,options);
         var result = await dialog.Result;
         AccomodationDto modalData = result.Data as AccomodationDto;
 
@@ -121,8 +131,8 @@
         AccomodationDto accomodationDto = selectedItems[0];
         UpdateAccomodationCommand updateAccomodationCommand = _mapper.Map<UpdateAccomodationCommand>(accomodationDto);
         var parameters = new DialogParameters { ["updateAccomodationCommand"] = updateAccomodationCommand };
-
-        var dialog = DialogService.Show<EditHotelAccomodationDialog>("Edit Accomodation", parameters);
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<EditHotelAccomodationDialog>("Edit Accomodation", parameters,options);
         var result = await dialog.Result;
         UpdateAccomodationCommand modalData = result.Data as UpdateAccomodationCommand;
 
@@ -149,8 +159,8 @@
 
     async Task CreateButton()
     {
-
-        var dialog = DialogService.Show<CreateHotelAccomodationDialog>("Create Accomodation");
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<CreateHotelAccomodationDialog>("Create Accomodation",options);
         var result = await dialog.Result;
 
 

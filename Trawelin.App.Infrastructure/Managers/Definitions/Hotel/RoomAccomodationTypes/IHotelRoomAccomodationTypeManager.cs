@@ -7,7 +7,7 @@ using Trawelin.App.Infrastructure.ServiceApi;
 
 namespace Trawelin.App.Infrastructure.Managers.Definitions.Hotel.RoomAccomodationTypes
 {
-    public interface IHotelRoomAccomodationTypeManager
+    public interface IHotelRoomAccomodationTypeManager : IManager
     {
 
         Task<RoomAccomodationTypeDtoListServiceResult> GetRoomAccomodationTypeAsync();

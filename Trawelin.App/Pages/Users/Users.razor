@@ -1,35 +1,36 @@
 ﻿@page "/users"
 @using Trawelin.App.Shared.Dialogs.Users
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Users> _localizer
 
-
-
-
-
+@if (IsTaskRunning)
+{
+	<MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}else{
 <MudDataGrid T="ApplicationUserDto" @ref="_mudTable" MultiSelection="true" Items="@UserList" SortMode="SortMode.Multiple" Filterable="true"
              Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" QuickFilter="@_quickFilter" Striped="true" Bordered="true">
     <ToolBarContent>
-        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Ekle</MudButton>
-        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Sil</MudButton>
-        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">Duzenle</MudButton>
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">@_localizer["CreateButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
 
         <MudSpacer />
-        <MudText Typo="Typo.h4">Kullanicilar</MudText>
+        <MudText Typo="Typo.h4">@_localizer["UsersTitle"]</MudText>
         <MudSpacer />
-        <MudTextField @bind-Value="_searchString" Placeholder="Ara" Adornment="Adornment.Start" Immediate="true"
+        <MudTextField @bind-Value="_searchString" Placeholder="@_localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <Columns>
         <SelectColumn T="ApplicationUserDto" />
         <Column T="ApplicationUserDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
-        <Column T="ApplicationUserDto" Field="UserName" Title="Kullanici Adi" />
-        <Column T="ApplicationUserDto" Field="Email" />
+        <Column T="ApplicationUserDto"  Field="UserName" Title="@_localizer["Username"]" />
+            <Column T="ApplicationUserDto" Field="@_localizer["Email"]" />
 
     </Columns>
     <PagerContent>
         <MudDataGridPager T="ApplicationUserDto" />
     </PagerContent>
 </MudDataGrid>
-
+}
 
 @code {
    
@@ -44,6 +45,11 @@
 
     //Search Bar String
     string _searchString;
+
+    bool IsTaskRunning = true;
+
+    DialogOptions options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+
 
     //QuickFilter Function
     private Func<ApplicationUserDto, bool> _quickFilter => x =>
@@ -63,17 +69,18 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
+        {
+            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
+        }
         //Service Init
         Client service = new Client("https://api.trawelin.com", _httpClient);
         //Get Token From Service
         var response = await service.ApiUsersGetAsync();
+        IsTaskRunning = false;
         if (response.Succeeded == true)
         {
             UserList = response.Data.ToList();
-            foreach (ApplicationUserDto item in UserList)
-            {
-                Console.WriteLine(item.UserName);
-            }
         }
         else
         {
@@ -98,7 +105,7 @@
         ApplicationUserDto dto = selectedItems[0];
         var parameters = new DialogParameters { ["server"] = dto, ["buttonColor"] = Color.Error, ["buttonText"] = "Delete" };
 
-        var dialog = DialogService.Show<UsersDialog>("Delete User", parameters);
+        var dialog = DialogService.Show<UsersDialog>("Delete User", parameters, options);
         var result = await dialog.Result;
 
         if (!result.Cancelled)
@@ -127,7 +134,7 @@
         ApplicationUserDto dto = selectedItems[0];
         var parameters = new DialogParameters { ["server"] = dto, ["buttonColor"] = Color.Primary, ["buttonText"] = "Edit" };
 
-        var dialog = DialogService.Show<UsersDialog>("Edit User", parameters);
+        var dialog = DialogService.Show<UsersDialog>("Edit User", parameters, options);
         var result = await dialog.Result;
         ApplicationUserDto test = result.Data as ApplicationUserDto;
 
@@ -159,7 +166,7 @@
     {
         var parameters = new DialogParameters { };
 
-        var dialog = DialogService.Show<CreateUserDialog>("Create User", parameters);
+        var dialog = DialogService.Show<CreateUserDialog>("Create User", parameters, options);
         var result = await dialog.Result;
 
 

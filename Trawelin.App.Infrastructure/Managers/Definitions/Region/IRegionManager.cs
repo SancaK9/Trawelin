@@ -7,7 +7,7 @@ using Trawelin.App.Infrastructure.ServiceApi;
 
 namespace Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
 {
-    public interface IRegionManager
+    public interface IRegionManager : IManager
     {
         //Country
         Task<CountryDtoListServiceResult> GetCountryAsync();

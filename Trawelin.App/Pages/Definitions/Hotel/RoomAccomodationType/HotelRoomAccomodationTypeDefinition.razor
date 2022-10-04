@@ -1,32 +1,36 @@
 ﻿@page "/hotelRoomAccomodationType"
 @using Trawelin.App.Shared.Dialogs.Definitions.Hotel.RoomAccomodationType
+@inject Microsoft.Extensions.Localization.IStringLocalizer<HotelRoomAccomodationTypeDefinition> _localizer
 
-
+@if (IsTaskRunning)
+{
+	<MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}else{
 <MudDataGrid T="RoomAccomodationTypeDto" @ref="_mudTable" MultiSelection="true" Items="@roomAccomodationTypeList" SortMode="SortMode.Multiple" Filterable="true"
              QuickFilter="@_quickFilter" Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" Striped="true" Bordered="true">
     <ToolBarContent>
-        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Ekle</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">@_localizer["CreateButton"]</MudButton>
 
-        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Sil</MudButton>
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
 
-        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">Duzenle</MudButton>
+        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
 
         <MudSpacer />
-        <MudText Typo="Typo.h4">Hotel Accomodation</MudText>
+            <MudText Typo="Typo.h4">@_localizer["Title"]</MudText>
         <MudSpacer />
-        <MudTextField @bind-Value="_searchString" Placeholder="Ara" Adornment="Adornment.Start" Immediate="true"
+        <MudTextField @bind-Value="_searchString" Placeholder="@_localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <Columns>
         <SelectColumn T="RoomAccomodationTypeDto" />
         <Column T="RoomAccomodationTypeDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
-        <Column T="RoomAccomodationTypeDto" Field="Name" Title="Name" Sortable="false" Filterable="false" IsEditable="false" />
+        <Column T="RoomAccomodationTypeDto" Field="Name" Title="@_localizer["Name"]" Sortable="false" Filterable="false" IsEditable="false" />
 
-        <Column T="RoomAccomodationTypeDto" Field="MinAdult" Title="MinAdult" Sortable="false" Filterable="false" IsEditable="false" />
-        <Column T="RoomAccomodationTypeDto" Field="MaxAdult" Title="MaxAdult" Sortable="false" Filterable="false" IsEditable="false" />
+            <Column T="RoomAccomodationTypeDto" Field="MinAdult" Title="@_localizer["MinAdult"]" Sortable="false" Filterable="false" IsEditable="false" />
+        <Column T="RoomAccomodationTypeDto" Field="MaxAdult" Title="@_localizer["MaxAdult"]" Sortable="false" Filterable="false" IsEditable="false" />
 
-        <Column T="RoomAccomodationTypeDto" Field="MinChildren" Title="MinChildren" Sortable="false" Filterable="false" IsEditable="false" />
-        <Column T="RoomAccomodationTypeDto" Field="MaxChildren" Title="MaxChildren" Sortable="false" Filterable="false" IsEditable="false" />
+        <Column T="RoomAccomodationTypeDto" Field="MinChildren" Title="@_localizer["MinChildren"]" Sortable="false" Filterable="false" IsEditable="false" />
+        <Column T="RoomAccomodationTypeDto" Field="MaxChildren" Title="@_localizer["MaxChildren"]" Sortable="false" Filterable="false" IsEditable="false" />
 
 
     </Columns>
@@ -34,6 +38,7 @@
         <MudDataGridPager T="RoomAccomodationTypeDto" />
     </PagerContent>
 </MudDataGrid>
+}
 
 @code {
     //DataGrid Table
@@ -51,12 +56,22 @@
     //Search Bar String
     string _searchString;
 
+    bool IsTaskRunning = true;
+
+    DialogOptions options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+
+
     protected override async Task OnInitializedAsync()
     {
+        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
+        {
+            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
+        }
         //Service Init
         Client service = new Client("https://api.trawelin.com", _httpClient);
         //Get Token From Service
         var response = await _hotelRoomAccomodationTypeManager.GetRoomAccomodationTypeAsync();
+        IsTaskRunning = false;
         if (response.Succeeded == true)
         {
             roomAccomodationTypeList = response.Data.ToList();
@@ -97,7 +112,7 @@
         RoomAccomodationTypeDto roomAccomodationTypeDto = selectedItems[0];
         var parameters = new DialogParameters { ["roomAccomodationTypeDto"] = roomAccomodationTypeDto };
 
-        var dialog = DialogService.Show<DeleteHotelRoomAccomodationTypeDialog>("Delete Room Accomodation", parameters);
+        var dialog = DialogService.Show<DeleteHotelRoomAccomodationTypeDialog>("Delete Room Accomodation", parameters,options);
         var result = await dialog.Result;
         RoomAccomodationTypeDto modalData = result.Data as RoomAccomodationTypeDto;
 
@@ -128,7 +143,7 @@
         UpdateRoomAccomodationTypeCommand updateRoomAccomodationTypeCommand = _mapper.Map<UpdateRoomAccomodationTypeCommand>(roomAccomodationTypeDto);
         var parameters = new DialogParameters { ["updateRoomAccomodationTypeCommand"] = updateRoomAccomodationTypeCommand };
 
-        var dialog = DialogService.Show<EditHotelRoomAccomodationTypeDialog>("Edit Room Accomodation", parameters);
+        var dialog = DialogService.Show<EditHotelRoomAccomodationTypeDialog>("Edit Room Accomodation", parameters,options);
         var result = await dialog.Result;
         UpdateRoomAccomodationTypeCommand modalData = result.Data as UpdateRoomAccomodationTypeCommand;
 
@@ -156,7 +171,7 @@
     async Task CreateButton()
     {
 
-        var dialog = DialogService.Show<CreateHotelRoomAccomodationTypeDialog>("Create Room Accomodation");
+        var dialog = DialogService.Show<CreateHotelRoomAccomodationTypeDialog>("Create Room Accomodation",options);
         var result = await dialog.Result;
 
 

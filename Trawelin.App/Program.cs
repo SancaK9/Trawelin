@@ -3,35 +3,70 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 using Trawelin.App;
-using Trawelin.App.Infrastructure.Managers.Identity.Authentication;
-using Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region;
-using Trawelin.App.Infrastructure.Managers.Identity.Users;
-using Trawelin.App.Infrastructure.Managers.Definitions.Suppliers;
-using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Categories;
-using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Types;
-using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Accomodations;
-using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.RoomAccomodationTypes;
-using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.RoomTypes;
+using System.Globalization;
+using Trawelin.App.Infrastructure.Constants.Localization;
+using Trawelin.App.Infrastructure.Managers;
+using Trawelin.App.Infrastructure.Managers.Preferences;
+using Trawelin.App.Infrastructure.Settings;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
+
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddMudServices();
 builder.Services.AddBlazoredLocalStorage();
 
+builder.Services.AddLocalization(options =>
+{
+    options.ResourcesPath = "Resources";
+});
 
-builder.Services.AddScoped<IAuthenticationManager, AuthenticationManager>();
-builder.Services.AddScoped<IUserManager, UserManager>();
-builder.Services.AddScoped<IRegionManager, RegionManager>();
-builder.Services.AddScoped<ISuppliersManager, SuppliersManager>();
-builder.Services.AddScoped<IHotelCategoriesManager, HotelCategoriesManager>();
-builder.Services.AddScoped<IHotelTypesManager, HotelTypesManager>();
-builder.Services.AddScoped<IHotelAccomodationManager, HotelAccomodationManager>();
-builder.Services.AddScoped<IHotelRoomAccomodationTypeManager, HotelRoomAccomodationTypeManager>();
-builder.Services.AddScoped<IHotelRoomTypesManager, HotelRoomTypesManager>();
+
+
+
+//Managers Init
+var managers = typeof(IManager);
+
+var types = managers
+    .Assembly
+    .GetExportedTypes()
+    .Where(t => t.IsClass && !t.IsAbstract)
+    .Select(t => new
+    {
+        Service = t.GetInterface($"I{t.Name}"),
+        Implementation = t
+    })
+    .Where(t => t.Service != null);
+
+foreach (var type in types)
+{
+    if (managers.IsAssignableFrom(type.Service))
+    {
+        builder.Services.AddTransient(type.Service, type.Implementation);
+    }
+}
+// End Managers Init
+
+
+
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+var host = builder.Build();
+
+var storageService = host.Services.GetRequiredService<IClientPreferenceManager>();
+if (storageService != null)
+{
+    CultureInfo culture;
+    var preference = await storageService.GetPreference() as ClientPreference;
+    if (preference != null)
+        culture = new CultureInfo(preference.LanguageCode);
+    else
+        culture = new CultureInfo(LocalizationConstants.SupportedLanguages.FirstOrDefault()?.Code ?? "en-US");
+    CultureInfo.DefaultThreadCurrentCulture = culture;
+    CultureInfo.DefaultThreadCurrentUICulture = culture;
+}
 
 await builder.Build().RunAsync();

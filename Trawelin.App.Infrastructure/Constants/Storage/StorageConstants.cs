@@ -16,6 +16,9 @@ namespace Trawelin.App.Infrastructure.Constants.Storage
 
             public static string headerName = "Authorization";
 
+            public static string languageCode = "LanguageCode";
+
+            public static string Preference = "clientPreference";
 
             //Users
             public static string userId = "X-Id";

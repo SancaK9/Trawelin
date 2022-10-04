@@ -1,61 +1,92 @@
 ﻿@page "/"
 @using Trawelin.App.Infrastructure.Constants.Storage
+@using Microsoft.Extensions.Localization
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Login> _localizer
 @layout LoginLayout
 
-<div class="container">
-	<div class="screen">
-		<div class="screen__content">
-			<div class="login">
-				<div class="login__field">
-					<i class="login__icon fas fa-user"></i>
-					<input @bind="@getTokenQuery.Email" type="text" class="login__input" placeholder="User name / Email">
-				</div>
-				<div class="login__field">
-					<i class="login__icon fas fa-lock"></i>
-					<input @bind="@getTokenQuery.Password"  type="password" class="login__input" placeholder="Password">
-				</div>
-				<label>@result</label>
-				<button disabled=@IsTaskRunning @onclick="LoginCheck" class="button login__submit">
-					<span class="button__text">Giris Yap</span>
-					<i class="button__icon fas fa-chevron-right"></i>
-				</button>
-			</div>
-			
-		</div>
-		<div class="screen__background">
-			<span class="screen__background__shape screen__background__shape4"></span>
-			<span class="screen__background__shape screen__background__shape3"></span>
-			<span class="screen__background__shape screen__background__shape2"></span>
-			<span class="screen__background__shape screen__background__shape1"></span>
-		</div>
-	</div>
-</div>
-
-@code{
-	public GetTokenQuery getTokenQuery = new();
+@if (IsTaskRunning)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
 
 
+    <section class="vh-100" style="background-image: url(https://acorn-html-classic-dashboard.coloredstrategies.com/img/background/background-blue.webp);">
+        <div class="container py-5 h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col col-xl-10">
+                    <div class="card" style="border-radius: 1rem;">
+                        <div class="row g-0">
+                            <div class="col-md-6 col-lg-5 d-none d-md-block">
+                                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/img1.webp"
+                                 alt="login form" class="img-fluid" style="border-radius: 1rem 0 0 1rem;" />
+                            </div>
+                            <div class="col-md-6 col-lg-7 d-flex align-items-center">
+                                <div class="card-body p-4 p-lg-5 text-black">
 
-	bool IsTaskRunning = false;
-	string result = "";
+                                    <form>
 
-	protected override async Task OnInitializedAsync()
-	{
-		getTokenQuery.Email = "admin@trawelin.com";
-		getTokenQuery.Password = "Admin12345.!*";
-		LoginCheck();
+                                        <div class="d-flex align-items-center mb-3 pb-1">
+                                        <span class="h1 fw-bold mb-0">@_localizer["Title"]</span>
+                                        </div>
 
-	}
+                                        <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">@_localizer["SubTitle"]</h5>
 
-	public async void LoginCheck()
-	{
-			
-		var result = await _authenticationManager.Login(getTokenQuery);
-		if (result.Succeeded)
-		{
-			_navigationManager.NavigateTo("/Index", true);
-		}
-		
-	}
+                                        <div class="form-outline mb-4">
+                                            <input @bind="@getTokenQuery.Email" type="email" id="form2Example17" class="form-control form-control-lg" />
+                                        <label class="form-label" for="form2Example17">@_localizer["E-mail"]</label>
+                                        </div>
+
+                                        <div class="form-outline mb-4">
+                                            <input @bind="@getTokenQuery.Password" type="password" id="form2Example27" class="form-control form-control-lg" />
+                                        <label class="form-label" for="form2Example27">@_localizer["Password"]</label>
+                                        </div>
+
+                                        <div class="pt-1 mb-4">
+                                            <button disabled=@IsTaskRunning @onclick="LoginCheck" class="btn btn-dark btn-lg btn-block" type="button">@_localizer["LoginButton"]</button>
+                                        </div>
+                                    
+                                    <a class="small text-muted" href="#!">@_localizer["Forgot"]</a>
+                                        <br />
+                                        <a href="#!" class="small text-muted">Terms of use.</a>
+                                        <a href="#!" class="small text-muted">Privacy policy</a>
+
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+@code {
+    public GetTokenQuery getTokenQuery = new();
+
+
+
+    bool IsTaskRunning = false;
+    string result = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        getTokenQuery.Email = "admin@trawelin.com";
+        getTokenQuery.Password = "Admin12345.!*";
+        //LoginCheck();
+
+    }
+
+    public async void LoginCheck()
+    {
+        IsTaskRunning = true;
+        var result = await _authenticationManager.Login(getTokenQuery);
+        IsTaskRunning = false;
+        if (result.Succeeded)
+        {
+            _navigationManager.NavigateTo("/Index", true);
+        }
+
+    }
 
 }

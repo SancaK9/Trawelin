@@ -7,7 +7,7 @@ using Trawelin.App.Infrastructure.ServiceApi;
 
 namespace Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Categories
 {
-    public interface IHotelCategoriesManager
+    public interface IHotelCategoriesManager : IManager
     {
 
         Task<CategoryDtoListServiceResult> GetCategoryAsync();

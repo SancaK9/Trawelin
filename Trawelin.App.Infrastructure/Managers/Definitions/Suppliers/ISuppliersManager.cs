@@ -7,7 +7,7 @@ using Trawelin.App.Infrastructure.ServiceApi;
 
 namespace Trawelin.App.Infrastructure.Managers.Definitions.Suppliers
 {
-    public interface ISuppliersManager
+    public interface ISuppliersManager : IManager
     {
 
         Task<SupplierDtoListServiceResult> GetSuppliersAsync();

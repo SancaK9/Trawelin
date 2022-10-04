@@ -21,10 +21,12 @@
 @using Trawelin.App.Infrastructure.Managers.Identity.Authentication
 @using Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
 @using Trawelin.App.Infrastructure.Managers.Identity.Users
+@using Trawelin.App.Infrastructure.Managers.Preferences
 @using Trawelin.App.Shared
 @using Trawelin.App.Infrastructure
 @using Trawelin.App.Infrastructure.ServiceApi
 @using Trawelin.App.Infrastructure.Constants.Storage
+
 
 @attribute [Authorize]
 @inject HttpClient _httpClient
@@ -36,6 +38,8 @@
 @inject IAuthenticationManager _authenticationManager
 @inject ILocalStorageService _localStorage;
 @inject IDialogService DialogService
+@inject IClientPreferenceManager _clientPreferenceManager
+
 @*Managers Init*@
 @inject IUserManager _userManager
 @inject IRegionManager _regionManager

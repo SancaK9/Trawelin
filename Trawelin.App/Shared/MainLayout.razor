@@ -1,18 +1,39 @@
-﻿@inherits LayoutComponentBase
+﻿@using BlazorHero.CleanArchitecture.Client.Shared.Components
+@using Trawelin.App.Shared.Components
+@inherits LayoutComponentBase
 
-<MudThemeProvider />
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="0">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        
+    <MudAppBar Elevation="25">
+        <MudImage Src="logo.png"></MudImage>
+
+        <MudToolBar DisableGutters="true">
+            <MudIconButton Icon="@Icons.Material.Outlined.Menu" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())" Class="ml-3" />
+        </MudToolBar>
+        <MudSpacer />
+
+
+
+        <MudIconButton Icon="@Icons.Material.Filled.Brightness4" Color="Color.Inherit" OnClick="@((e) => DarkMode())" />
+        <LanguageSelector />
+        <MudMenu OffsetX="true" Dense="true" Class="mt-1 ml-4">
+            <ActivatorContent>
+
+                <MudAvatar Color="Color.Secondary">S</MudAvatar>
+
+            </ActivatorContent>
+            <ChildContent>
+                <UserCard Class="mt-n2" />
+                <MudDivider Class="mb-2" />
+                <MudListItem Text="Profile" Href="/account" Icon="@Icons.Material.Outlined.Person" />
+
+            </ChildContent>
+        </MudMenu>
     </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
-        <MudDrawerHeader>
-            <MudImage Src="logo.png" Style="padding-left:15px"></MudImage>
-        </MudDrawerHeader>
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="25" ClipMode="DrawerClipMode.Always">
         <NavMenu />
     </MudDrawer>
     <MudMainContent>
@@ -23,12 +44,21 @@
 </MudLayout>
 
 @code {
+    private MudTheme _theme = new();
+    private bool _isDarkMode;
     bool _drawerOpen = true;
-    protected override async Task OnInitializedAsync()
-    {
-    }
+
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
     }
+
+
+    private async Task DarkMode()
+    {
+        _isDarkMode = !_isDarkMode;
+    }
+
+  
+
 }

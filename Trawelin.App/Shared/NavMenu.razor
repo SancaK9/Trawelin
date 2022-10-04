@@ -1,43 +1,57 @@
-﻿<MudNavMenu>
-    <MudDivider Class="my-2" />
-    <MudText Typo="Typo.h6" Class="px-4">Serhan Aydin</MudText>
-    <MudText Typo="Typo.body2" Class="px-4 mud-text-secondary"> Role : Admin</MudText>
-    <MudDivider Class="my-2" />
-    <MudNavLink Href="index" Icon="@Icons.Material.Filled.Home">Dashboard</MudNavLink>
+﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<NavMenu> _localizer
+<MudNavMenu>
+    <MudListSubheader Class="mt-2 mb-n2">@_localizer["HomeTitle"]</MudListSubheader>
+    <MudNavLink Icon="@Icons.Material.Filled.Dashboard" Href="/index">@_localizer["Dashboard"]</MudNavLink>
+
+    <MudListSubheader Class="mt-2 mb-n2">@_localizer["ReservationTitle"]</MudListSubheader>
+    <MudNavLink Icon="@Icons.Material.Filled.Assignment">@_localizer["Rezervations"]</MudNavLink>
+
+
+
     @*Nav Hotel Section*@
-    <MudNavGroup Title="Otel" Icon="@Icons.Material.Filled.Hotel" Expanded="true">
 
-        <MudNavLink Icon="@Icons.Material.Filled.List" Href="/hotel">Otel Listesi</MudNavLink>
+    <MudListSubheader Class="mt-2 mb-n2">@_localizer["HotelTitle"]</MudListSubheader>
 
-        <MudNavGroup Title="Tanimlamalar" Icon="@Icons.Material.Filled.Settings" Expanded="false">
-            <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/countryDefinition">Bolgeler</MudNavLink>
-            <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelCategories">Kategoriler</MudNavLink>
-            <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelRoomAccomodationType">Oda/Konaklama Sekli</MudNavLink>
-            <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelRoomTypes">Oda Tipleri</MudNavLink>
-            <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelAccomodation">Pansiyonlar</MudNavLink>
-            <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelTypes">Otel Tipleri</MudNavLink>
-        </MudNavGroup>
+    <MudNavLink Icon="@Icons.Material.Filled.Hotel" Href="/hotel">@_localizer["Hotels"]</MudNavLink>
 
-        <MudNavLink Icon="@Icons.Material.Filled.Monitor" Href="/hotel">Stop / Free Sale Monitoru</MudNavLink>
-
+    <MudNavGroup Title="@_localizer["Definitions"]" Icon="@Icons.Material.Filled.EditNote" Expanded="false">
+        <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/countryDefinition">@_localizer["Regions"]</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelCategories">@_localizer["Categories"]</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelRoomAccomodationType">@_localizer["AccomodationType"]</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelRoomTypes">@_localizer["RoomType"]</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelAccomodation">@_localizer["Accomodations"]</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelTypes">@_localizer["HotelType"]</MudNavLink>
     </MudNavGroup>
 
-    <MudNavGroup Title="Ayarlar" Icon="@Icons.Material.Filled.Settings" Expanded="false">
-        <MudNavLink Icon="@Icons.Material.Filled.SupervisedUserCircle" Href="/users">Kullanicilar</MudNavLink>
+    <MudNavLink Icon="@Icons.Material.Filled.Monitor" Href="/hotel">@_localizer["StopFreeSale"]</MudNavLink>
 
-        <MudNavLink Icon="@Icons.Material.Filled.SettingsAccessibility" Href="/suppliersdefinition">Tedarikci Tanimlama</MudNavLink>
+
+    @*Nav Operation Section*@
+    <MudListSubheader Class="mt-2 mb-n2">@_localizer["OperationTitle"]</MudListSubheader>
+    <MudNavLink Icon="@Icons.Material.Filled.SettingsSuggest">@_localizer["Operations"]</MudNavLink>
+
+
+
+
+    <MudDivider Class="my-2" />
+
+    <MudNavGroup Title="@_localizer["Settings"]" Icon="@Icons.Material.Filled.Settings" Expanded="false">
+        <MudNavLink Icon="@Icons.Material.Filled.SupervisedUserCircle" Href="/users">@_localizer["Users"]</MudNavLink>
+
+        <MudNavLink Icon="@Icons.Material.Filled.SettingsAccessibility" Href="/suppliersdefinition">@_localizer["Suppliers"]</MudNavLink>
     </MudNavGroup>
+    <MudNavLink Icon="@Icons.Material.Filled.ExitToApp" Href="/users">@_localizer["LogOut"]</MudNavLink>
 </MudNavMenu>
 
 @code {
     private string Username { get; set; }
-
+    private string Email { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
-        {
-            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
-        }
         Username = await _localStorage.GetItemAsync<string>(StorageConstants.Local.userUsername);
+        Email = await _localStorage.GetItemAsync<string>(StorageConstants.Local.userEmail);
     }
+
+    
+
 }
