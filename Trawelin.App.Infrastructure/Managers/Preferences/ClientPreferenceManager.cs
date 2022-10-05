@@ -6,6 +6,7 @@ using Microsoft.Extensions.Localization;
 using Trawelin.App.Infrastructure.Constants.Storage;
 using Trawelin.App.Infrastructure.Settings;
 using BlazorHero.CleanArchitecture.Shared.Wrapper;
+using MudBlazor;
 
 namespace Trawelin.App.Infrastructure.Managers.Preferences
 {
@@ -66,7 +67,25 @@ namespace Trawelin.App.Infrastructure.Managers.Preferences
             };
 
         }
+        public async Task<MudTheme> GetCurrentThemeAsync()
+        {
+            var preference = await GetPreference() as ClientPreference;
+            if (preference != null)
+            {
+                if (preference.IsDarkMode == true) return BlazorTheme.DarkTheme;
+            }
+            return BlazorTheme.DefaultTheme;
+        }
 
+        public async Task<bool> IsRTL()
+        {
+            var preference = await GetPreference() as ClientPreference;
+            if (preference != null)
+            {
+                if (preference.IsDarkMode == true) return false;
+            }
+            return preference.IsRTL;
+        }
 
         public async Task<IPreference> GetPreference()
         {

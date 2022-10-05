@@ -2,6 +2,7 @@
 @using Trawelin.App.Shared.Dialogs.Definitions.Hotel.Categories
 @inject Microsoft.Extensions.Localization.IStringLocalizer<HotelCategoriesDefinition> _localizer
 
+<Trawelin.App.Shared.Components.ComponentTitle Title="Categories" Description="Manage Categories" />
 @if (IsTaskRunning)
 {
 	<MudProgressCircular Color="Color.Primary" Indeterminate="true" />
@@ -16,7 +17,7 @@
             <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
 
         <MudSpacer />
-            <MudText Typo="Typo.h4">@_localizer["Title"]</MudText>
+            @*<MudText Typo="Typo.h4">@_localizer["Title"]</MudText>*@
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="@_localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>

@@ -2,6 +2,8 @@
 @using Trawelin.App.Shared.Dialogs.Hotels
 @inject Microsoft.Extensions.Localization.IStringLocalizer<Hotels> _localizer
 
+    <Trawelin.App.Shared.Components.ComponentTitle Title="Hotels" Description="Manage Hotels"/>
+
 @if (IsTaskRunning)
 {
         <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
@@ -16,7 +18,7 @@ else
                 <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
 
             <MudSpacer />
-            <MudText Typo="Typo.h4">@_localizer["Title"]</MudText>
+            @*<MudText Typo="Typo.h4">@_localizer["Title"]</MudText>*@
             <MudSpacer />
             <MudTextField @bind-Value="_searchString" Placeholder="@_localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -35,6 +37,13 @@ else
 }
 
 @code {
+    private List<BreadcrumbItem> _items = new List<BreadcrumbItem>
+    {
+        new BreadcrumbItem("Dashboard", href: "#", icon: Icons.Material.Filled.Home),
+        new BreadcrumbItem("Hotels", href: "#", icon: Icons.Material.Filled.VideoLibrary),
+        new BreadcrumbItem("Hotel List", href: null, disabled: true, icon: Icons.Material.Filled.Create)
+    };
+
     private MudDataGrid<HotelDto> _mudTable;
 
     private List<HotelDto> selectedItems;

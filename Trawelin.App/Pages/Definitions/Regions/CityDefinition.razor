@@ -2,6 +2,7 @@
 @using Trawelin.App.Shared.Dialogs.Definitions.Regions.City
 @inject Microsoft.Extensions.Localization.IStringLocalizer<CityDefinition> _localizer
 
+<Trawelin.App.Shared.Components.ComponentTitle Title="Cities" Description="Manage Cities" />
 @if (IsTaskRunning)
 {
 	<MudProgressCircular Color="Color.Primary" Indeterminate="true" />
@@ -20,7 +21,7 @@
 
 
         <MudSpacer />
-        <MudText Typo="Typo.h4">@_localizer["Title"]</MudText>
+        @*<MudText Typo="Typo.h4">@_localizer["Title"]</MudText>*@
         <MudSpacer />
             <MudTextField @bind-Value="_searchString" Placeholder="@_localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>

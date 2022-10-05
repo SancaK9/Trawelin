@@ -1,7 +1,8 @@
-﻿@using BlazorHero.CleanArchitecture.Client.Shared.Components
+﻿@using Trawelin.App.Infrastructure.Settings
 @using Trawelin.App.Shared.Components
 @inherits LayoutComponentBase
 
+<MudRTLProvider RightToLeft="@_rightToLeft">
 <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -13,11 +14,18 @@
         <MudToolBar DisableGutters="true">
             <MudIconButton Icon="@Icons.Material.Outlined.Menu" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())" Class="ml-3" />
         </MudToolBar>
+
         <MudSpacer />
 
 
-
+        <MudIconButton Icon="@Icons.Material.Outlined.Notifications" Color="Color.Inherit" />
+        <MudIconButton Icon="@Icons.Material.Outlined.PushPin" Color="Color.Inherit" />
+        <MudIconButton Icon="@Icons.Material.Outlined.PeopleAlt" Color="Color.Inherit" />
+        <MudDivider Vertical="true"/>
         <MudIconButton Icon="@Icons.Material.Filled.Brightness4" Color="Color.Inherit" OnClick="@((e) => DarkMode())" />
+        <MudTooltip Text="RTL">
+            <MudIconButton Icon="@Icons.Material.Filled.FormatTextdirectionRToL" Color="Color.Inherit" OnClick="@((e) => RightToLeftToggle())" />
+        </MudTooltip>
         <LanguageSelector />
         <MudMenu OffsetX="true" Dense="true" Class="mt-1 ml-4">
             <ActivatorContent>
@@ -42,11 +50,28 @@
         </MudContainer>
     </MudMainContent>
 </MudLayout>
-
+</MudRTLProvider>
 @code {
     private MudTheme _theme = new();
     private bool _isDarkMode;
-    bool _drawerOpen = true;
+    bool _drawerOpen = false;
+
+    private bool _rightToLeft = false;
+   
+    protected override async Task OnInitializedAsync()
+    {
+        _theme = BlazorTheme.DefaultTheme;
+        _theme = await _clientPreferenceManager.GetCurrentThemeAsync();
+        _rightToLeft = await _clientPreferenceManager.IsRTL();
+        
+    }
+
+    private async Task RightToLeftToggle()
+    {
+        var isRtl = await _clientPreferenceManager.ToggleLayoutDirection();
+        _rightToLeft = isRtl;
+
+    }
 
     void DrawerToggle()
     {
@@ -56,7 +81,10 @@
 
     private async Task DarkMode()
     {
-        _isDarkMode = !_isDarkMode;
+        bool isDarkMode = await _clientPreferenceManager.ToggleDarkModeAsync();
+        _theme = isDarkMode
+            ? BlazorTheme.DefaultTheme
+            : BlazorTheme.DarkTheme;
     }
 
   
