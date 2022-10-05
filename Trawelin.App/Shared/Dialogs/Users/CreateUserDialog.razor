@@ -7,9 +7,9 @@
         </MudText>
     </TitleContent>
     <DialogContent>
-        <MudTextField @bind-Value="@user.UserName" Label="@_localizer["Username"]" />
-        <MudTextField @bind-Value="@user.Password" Label="@_localizer["Password"]" />
-        <MudTextField @bind-Value="@user.Email" Label="@_localizer["Email"]" />
+        <MudTextField @bind-Value="@createUserCommand.UserName" Label="@_localizer["Username"]" />
+        <MudTextField @bind-Value="@createUserCommand.Password" Label="@_localizer["Password"]" />
+        <MudTextField @bind-Value="@createUserCommand.Email" Label="@_localizer["Email"]" />
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">@_localizer["CancelButton"]</MudButton>
@@ -20,7 +20,7 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    public CreateUserCommand user { get; set; } = new CreateUserCommand();
+    public CreateUserCommand createUserCommand { get; set; } = new CreateUserCommand();
 
     private void Cancel()
     {
@@ -29,6 +29,6 @@
 
     private void DeleteServer()
     {
-        MudDialog.Close(DialogResult.Ok(user));
+        MudDialog.Close(DialogResult.Ok(createUserCommand));
     }
 }

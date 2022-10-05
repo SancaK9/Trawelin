@@ -1,20 +1,20 @@
-﻿
+﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<DeleteSupplierDialog> _localizer
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Material.Filled.Delete" Class="mr-3 mb-n1" />
-            Delete Supplier?
+            @_localizer["Title"]
         </MudText>
     </TitleContent>
     <DialogContent>
         <MudTextField @bind-Value="@supplierDto.Id" Label="Id" ReadOnly="true" />
-        <MudTextField @bind-Value="@supplierDto.Title" Label="Isim" />
-        <MudTextField @bind-Value="@supplierDto.TaxNum" Label="Vergi No" />
-        <MudTextField @bind-Value="@supplierDto.Address" Label="Adres" />
+        <MudTextField @bind-Value="@supplierDto.Title" Label="@_localizer["Name"]" />
+        <MudTextField @bind-Value="@supplierDto.TaxNum" Label="@_localizer["TaxNumber"]" />
+        <MudTextField @bind-Value="@supplierDto.Address" Label="@_localizer["Address"]" />
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Error" OnClick="DeleteSupplier">Sil</MudButton>
+        <MudButton OnClick="Cancel">@_localizer["CancelButton"]</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteSupplier">@_localizer["DeleteButton"]</MudButton>
     </DialogActions>
 </MudDialog>
 

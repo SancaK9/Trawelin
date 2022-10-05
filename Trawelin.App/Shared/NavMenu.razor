@@ -1,18 +1,18 @@
 ﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<NavMenu> _localizer
 <MudNavMenu>
-    <MudListSubheader Class="mt-2 mb-n2">@_localizer["HomeTitle"]</MudListSubheader>
+    @*<MudListSubheader Class="mt-2 mb-n2">@_localizer["HomeTitle"]</MudListSubheader>*@
     <MudNavLink Icon="@Icons.Material.Filled.Dashboard" Href="/index">@_localizer["Dashboard"]</MudNavLink>
 
-    <MudListSubheader Class="mt-2 mb-n2">@_localizer["ReservationTitle"]</MudListSubheader>
-    <MudNavLink Icon="@Icons.Material.Filled.Assignment">@_localizer["Rezervations"]</MudNavLink>
+    @*<MudListSubheader Class="mt-2 mb-n2">@_localizer["ReservationTitle"]</MudListSubheader>*@
+    <MudNavLink Icon="@Icons.Material.Filled.Assignment" Href="/rezervation">@_localizer["Rezervations"]</MudNavLink>
 
 
 
     @*Nav Hotel Section*@
 
-    <MudListSubheader Class="mt-2 mb-n2">@_localizer["HotelTitle"]</MudListSubheader>
+    @*<MudListSubheader Class="mt-2 mb-n2">@_localizer["HotelTitle"]</MudListSubheader>*@
 
-    <MudNavLink Icon="@Icons.Material.Filled.Hotel" Href="/hotel">@_localizer["Hotels"]</MudNavLink>
+    <MudNavLink Icon="@Icons.Material.Filled.Hotel" Href="/hotels">@_localizer["Hotels"]</MudNavLink>
 
     <MudNavGroup Title="@_localizer["Definitions"]" Icon="@Icons.Material.Filled.EditNote" Expanded="false">
         <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/countryDefinition">@_localizer["Regions"]</MudNavLink>
@@ -23,12 +23,12 @@
         <MudNavLink Icon="@Icons.Material.Filled.AppRegistration" Href="/hotelTypes">@_localizer["HotelType"]</MudNavLink>
     </MudNavGroup>
 
-    <MudNavLink Icon="@Icons.Material.Filled.Monitor" Href="/hotel">@_localizer["StopFreeSale"]</MudNavLink>
+    <MudNavLink Icon="@Icons.Material.Filled.Monitor" Href="/stopfreesale">@_localizer["StopFreeSale"]</MudNavLink>
 
 
     @*Nav Operation Section*@
-    <MudListSubheader Class="mt-2 mb-n2">@_localizer["OperationTitle"]</MudListSubheader>
-    <MudNavLink Icon="@Icons.Material.Filled.SettingsSuggest">@_localizer["Operations"]</MudNavLink>
+    @*<MudListSubheader Class="mt-2 mb-n2">@_localizer["OperationTitle"]</MudListSubheader>*@
+    <MudNavLink Icon="@Icons.Material.Filled.SettingsSuggest" Href="/operation">@_localizer["Operations"]</MudNavLink>
 
 
 

@@ -1,0 +1,160 @@
+﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<EditHotelDialog> _localizer
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Create" Class="mr-3 mb-n1" />
+            @_localizer["Title"]
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="@updateHotelCommand.Id" Label="@_localizer["HotelId"]" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="@updateHotelCommand.Name" Label="@_localizer["Name"]" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="@hotelGeneralCommandDto.Email" Label="@_localizer["Email"]" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="@hotelGeneralCommandDto.Emails" Label="@_localizer["Emails"]" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudAutocomplete @ref="@categoryAuto" T="CategoryDto" Label="@_localizer["SelectCategory"]" SearchFunc="@SearchCountry" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnCategoryValueChanged" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudAutocomplete @ref="@hotelTypeAuto" T="HotelTypeDto" Label="@_localizer["SelectHotelType"]" SearchFunc="@SearchHoteType" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnHotelTypeValueChanged" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudAutocomplete @ref="@supplierAuto" T="SupplierDto" Label="@_localizer["SelectSupplier"]" SearchFunc="@SearchSupplier" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Title}")" ValueChanged="OnSupplierValueChanged" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="@hotelGeneralCommandDto.Manager" Label="@_localizer["Manager"]" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="@hotelGeneralCommandDto.Phone" Label="@_localizer["PhoneNumber"]" />
+            </MudItem>
+
+            <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="@hotelGeneralCommandDto.Note" Label="@_localizer["Note"]" />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <Trawelin.App.Shared.Components.RegionSelector VillageChanged="SelectedVillage" villageId="updateHotelCommand.General.RegionId"/>
+            </MudItem>
+            <MudCheckBox T="bool" @bind-Checked="@hotelGeneralCommandDto.Active" Label="@_localizer["IsActive"]" />
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@_localizer["CancelButton"]</MudButton>
+        <MudButton Color="Color.Info" OnClick="CreateCountry">@_localizer["EditButton"]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    private MudAutocomplete<CategoryDto> categoryAuto;
+
+    List<CategoryDto> categoryDtos { get; set; } = new List<CategoryDto>();
+
+    private MudAutocomplete<SupplierDto> supplierAuto;
+
+    List<SupplierDto> supplierDto { get; set; } = new List<SupplierDto>();
+
+    private MudAutocomplete<HotelTypeDto> hotelTypeAuto;
+
+    List<HotelTypeDto> hotelTypeDtos { get; set; } = new List<HotelTypeDto>();
+
+    void SelectedVillage(VillageDto village) => hotelGeneralCommandDto.RegionId = village.Id;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Set Token If Header Null
+        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
+        {
+            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
+        }
+        //Service Init
+        Client service = new Client("https://api.trawelin.com", _httpClient);
+
+        var categoryResponse = await _hotelCategoriesManager.GetCategoryAsync();
+        if (categoryResponse.Succeeded == true)
+        {
+            categoryDtos = categoryResponse.Data.ToList();
+        }
+        var hotelTypeResponse = await _hotelTypeManager.GetHotelTypeAsync();
+        if (hotelTypeResponse.Succeeded == true)
+        {
+            hotelTypeDtos = hotelTypeResponse.Data.ToList();
+        }
+        var supplierResponse = await _suppliersManager.GetSuppliersAsync();
+        if (supplierResponse.Succeeded == true)
+        {
+            supplierDto = supplierResponse.Data.ToList();
+        }
+
+    }
+    //
+    private async Task OnCategoryValueChanged(CategoryDto category)
+    {
+        hotelGeneralCommandDto.CategoryId = category.Id;
+
+        return;
+    }
+    private async Task OnHotelTypeValueChanged(HotelTypeDto hotelType)
+    {
+        hotelGeneralCommandDto.HotelTypeId = hotelType.Id;
+
+        return;
+    }
+    private async Task OnSupplierValueChanged(SupplierDto supplier)
+    {
+        updateHotelCommand.SupplierId = supplier.Id;
+
+        return;
+    }
+    //
+    private async Task<IEnumerable<CategoryDto>> SearchCountry(string value)
+    {
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return categoryDtos;
+        return categoryDtos.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+    //
+    private async Task<IEnumerable<HotelTypeDto>> SearchHoteType(string value)
+    {
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return hotelTypeDtos;
+        return hotelTypeDtos.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+    private async Task<IEnumerable<SupplierDto>> SearchSupplier(string value)
+    {
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return supplierDto;
+        return supplierDto.Where(x => x.Title.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public UpdateHotelCommand updateHotelCommand { get; set; } = new UpdateHotelCommand();
+
+    public HotelGeneralCommandDto hotelGeneralCommandDto { get; set; } = new HotelGeneralCommandDto();
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void CreateCountry()
+    {
+        updateHotelCommand.General = hotelGeneralCommandDto;
+        MudDialog.Close(DialogResult.Ok(updateHotelCommand));
+    }
+}

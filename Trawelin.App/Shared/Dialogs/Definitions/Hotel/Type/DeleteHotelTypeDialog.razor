@@ -1,19 +1,19 @@
-﻿
+﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<DeleteHotelTypeDialog> _localizer
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Material.Filled.Delete" Class="mr-3 mb-n1" />
-            Delete Hotel Type?
+            @_localizer["Title"]
         </MudText>
     </TitleContent>
     <DialogContent>
         <MudTextField @bind-Value="@hotelTypeDto.Id" Label="Id" ReadOnly="true" />
-        <MudTextField @bind-Value="@hotelTypeDto.Name" Label="Isim" />
+        <MudTextField @bind-Value="@hotelTypeDto.Name" Label="@_localizer["Name"]" />
       
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Error" OnClick="DeleteCountry">Sil</MudButton>
+        <MudButton OnClick="Cancel">@_localizer["CancelButton"]</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteCountry">@_localizer["DeleteButton"]</MudButton>
     </DialogActions>
 </MudDialog>
 

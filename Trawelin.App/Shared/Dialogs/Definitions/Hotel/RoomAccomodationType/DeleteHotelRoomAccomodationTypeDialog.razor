@@ -1,24 +1,24 @@
-﻿
+﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<DeleteHotelRoomAccomodationTypeDialog> _localizer
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Material.Filled.Delete" Class="mr-3 mb-n1" />
-            Delete Accomodation?
+            @_localizer["Title"]
         </MudText>
     </TitleContent>
     <DialogContent>
         <MudTextField @bind-Value="@roomAccomodationTypeDto.Id" Label="Id" ReadOnly="true" />
-        <MudTextField @bind-Value="@roomAccomodationTypeDto.Name" Label="Isim" />
+        <MudTextField @bind-Value="@roomAccomodationTypeDto.Name" Label="@_localizer["Name"]" />
       
-        <MudTextField @bind-Value="@roomAccomodationTypeDto.MinAdult" Label="MinAdult" />
-        <MudTextField @bind-Value="@roomAccomodationTypeDto.MaxAdult" Label="MaxAdult" />
-        <MudTextField @bind-Value="@roomAccomodationTypeDto.MinChildren" Label="MinChildren" />
-        <MudTextField @bind-Value="@roomAccomodationTypeDto.MaxChildren" Label="MaxChildren" />
+        <MudTextField @bind-Value="@roomAccomodationTypeDto.MinAdult" Label="@_localizer["MinAdult"]" />
+        <MudTextField @bind-Value="@roomAccomodationTypeDto.MaxAdult" Label="@_localizer["MaxAdult"]" />
+        <MudTextField @bind-Value="@roomAccomodationTypeDto.MinChildren" Label="@_localizer["MinChildren"]" />
+        <MudTextField @bind-Value="@roomAccomodationTypeDto.MaxChildren" Label="@_localizer["MaxChildren"]" />
 
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Error" OnClick="DeleteCountry">Sil</MudButton>
+        <MudButton OnClick="Cancel">@_localizer["CancelButton"]</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteCountry">@_localizer["DeleteButton"]</MudButton>
     </DialogActions>
 </MudDialog>
 

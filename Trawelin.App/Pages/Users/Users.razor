@@ -102,22 +102,22 @@
     async Task DeleteButton()
     {
 
-        ApplicationUserDto dto = selectedItems[0];
-        var parameters = new DialogParameters { ["server"] = dto, ["buttonColor"] = Color.Error, ["buttonText"] = "Delete" };
-
-        var dialog = DialogService.Show<UsersDialog>("Delete User", parameters, options);
+        ApplicationUserDto applicationUserDto = selectedItems[0];
+        var parameters = new DialogParameters { ["applicationUserDto"] = applicationUserDto};
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<DeleteUserDialog>("Delete User", parameters, options);
         var result = await dialog.Result;
-
+        ApplicationUserDto modalData = result.Data as ApplicationUserDto;
         if (!result.Cancelled)
         {
             try
             {
-                var response = await _userManager.DeleteUserAsync(dto.Id);
+                var response = await _userManager.DeleteUserAsync(modalData.Id);
                 if (response.Succeeded)
                 {
 
-                    UserList.Remove(dto);
-                    _mudTable.SetSelectedItemAsync(dto);
+                    UserList.Remove(applicationUserDto);
+                    _mudTable.SetSelectedItemAsync(applicationUserDto);
                     Snackbar.Add("Isleminiz Basarili", Severity.Success);
                 }
             }
@@ -131,26 +131,24 @@
 
     async Task EditButton()
     {
-        ApplicationUserDto dto = selectedItems[0];
-        var parameters = new DialogParameters { ["server"] = dto, ["buttonColor"] = Color.Primary, ["buttonText"] = "Edit" };
-
-        var dialog = DialogService.Show<UsersDialog>("Edit User", parameters, options);
+        ApplicationUserDto applicationUserDto = selectedItems[0];
+        UpdateUserCommand updateUserCommand = _mapper.Map<UpdateUserCommand>(applicationUserDto);
+        var parameters = new DialogParameters { ["updateUserCommand"] = updateUserCommand};
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<EditUserDialog>("Edit User", parameters, options);
         var result = await dialog.Result;
-        ApplicationUserDto test = result.Data as ApplicationUserDto;
+        UpdateUserCommand modalData = result.Data as UpdateUserCommand;
 
         if (!result.Cancelled)
         {
             try
             {
-                UpdateUserCommand updateUserCommand = new();
-                updateUserCommand.Id = dto.Id;
-                updateUserCommand.UserName = test.UserName;
-                var response = await _userManager.UpdateUserAsync(updateUserCommand);
+                var response = await _userManager.UpdateUserAsync(modalData);
                 if (response.Succeeded)
                 {
-                    UserList.Remove(dto);
-                    UserList.Add(test);
-                    _mudTable.SetSelectedItemAsync(dto);
+                    UserList.Remove(applicationUserDto);
+                    UserList.Add(response.Data);
+                    _mudTable.SetSelectedItemAsync(applicationUserDto);
                     Snackbar.Add("Isleminiz Basarili", Severity.Success);
                 }
             }
@@ -164,9 +162,9 @@
 
     async Task CreateButton()
     {
-        var parameters = new DialogParameters { };
 
-        var dialog = DialogService.Show<CreateUserDialog>("Create User", parameters, options);
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<CreateUserDialog>("Create User",options);
         var result = await dialog.Result;
 
 
@@ -175,12 +173,10 @@
             try
             {
                 CreateUserCommand createUserCommand = result.Data as CreateUserCommand;
-                ApplicationUserDto userdto = _mapper.Map<ApplicationUserDto>(createUserCommand);
                 var response = await _userManager.CreateUserAsync(createUserCommand);
                 if (response.Succeeded)
                 {
-                    userdto.Id = response.Data.Id;
-                    UserList.Add(userdto);
+                    UserList.Add(response.Data);
                     Snackbar.Add("Isleminiz Basarili", Severity.Success);
                 }
             }

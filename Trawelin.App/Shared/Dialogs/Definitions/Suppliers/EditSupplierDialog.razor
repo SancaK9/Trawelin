@@ -1,26 +1,26 @@
-﻿
+﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<EditSupplierDialog> _localizer
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3 mb-n1" />
-            Edit Supplier?
+            @_localizer["Title"]
         </MudText>
     </TitleContent>
     <DialogContent>
 
-        <MudAutocomplete @ref="@countryAuto" T="CountryDto" Label="Ulke Seciniz" SearchFunc="@SearchCountry" ResetValueOnEmptyText="@resetValueOnEmptyText" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnCountryValueChanged" />
-        <MudAutocomplete @ref="@cityAuto" T="CityDto" Label="Sehir Seciniz" SearchFunc="@SearchCity" ResetValueOnEmptyText="@resetValueOnEmptyText" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnCityValueChanged" />
-        <MudAutocomplete @ref="@districtAuto" T="DistrictDto" Label="Ilce Seciniz" SearchFunc="@SearchDistrict" ResetValueOnEmptyText="@resetValueOnEmptyText" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnDistrictValueChanged" />
-        <MudAutocomplete @ref="@villageAuto" T="VillageDto" Label="Semt Seciniz" SearchFunc="@SearchVillage" ResetValueOnEmptyText="@resetValueOnEmptyText" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnVillageValueChanged" />
+        <MudAutocomplete @ref="@countryAuto" T="CountryDto" Label="@_localizer["SelectCountry"]" SearchFunc="@SearchCountry" ResetValueOnEmptyText="@resetValueOnEmptyText" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnCountryValueChanged" />
+        <MudAutocomplete @ref="@cityAuto" T="CityDto" Label="@_localizer["SelectCity"]" SearchFunc="@SearchCity" ResetValueOnEmptyText="@resetValueOnEmptyText" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnCityValueChanged" />
+        <MudAutocomplete @ref="@districtAuto" T="DistrictDto" Label="@_localizer["SelectDistrict"]" SearchFunc="@SearchDistrict" ResetValueOnEmptyText="@resetValueOnEmptyText" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnDistrictValueChanged" />
+        <MudAutocomplete @ref="@villageAuto" T="VillageDto" Label="@_localizer["SelectVillage"]" SearchFunc="@SearchVillage" ResetValueOnEmptyText="@resetValueOnEmptyText" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnVillageValueChanged" />
 
         <MudTextField @bind-Value="@updateSupplierCommand.Id" Label="Id" ReadOnly="true" />
-        <MudTextField @bind-Value="@updateSupplierCommand.Title" Label="Isim" />
-        <MudTextField @bind-Value="@updateSupplierCommand.TaxNum" Label="Vergi No" />
-        <MudTextField @bind-Value="@updateSupplierCommand.Address" Label="Adres" />
+        <MudTextField @bind-Value="@updateSupplierCommand.Title" Label="@_localizer["Name"]" />
+        <MudTextField @bind-Value="@updateSupplierCommand.TaxNum" Label="@_localizer["TaxNumber"]" />
+        <MudTextField @bind-Value="@updateSupplierCommand.Address" Label="@_localizer["Address"]" />
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Info" OnClick="EditSupplier">Duzenle</MudButton>
+        <MudButton OnClick="Cancel">@_localizer["CancelButton"]</MudButton>
+        <MudButton Color="Color.Info" OnClick="EditSupplier">@_localizer["EditButton"]</MudButton>
     </DialogActions>
 </MudDialog>
 

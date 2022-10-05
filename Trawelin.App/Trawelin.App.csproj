@@ -83,7 +83,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Resources\Pages\Definitions\Hotel\Accomodation\" />
+	  <Folder Include="Resources\Shared\Dialogs\Definitions\Hotel\RoomType\" />
 	</ItemGroup>
 	
 	

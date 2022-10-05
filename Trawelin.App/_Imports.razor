@@ -18,6 +18,7 @@
 @using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Types
 @using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Accomodations
 @using Trawelin.App.Infrastructure.Managers.Definitions.Suppliers
+@using Trawelin.App.Infrastructure.Managers.Hotels
 @using Trawelin.App.Infrastructure.Managers.Identity.Authentication
 @using Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
 @using Trawelin.App.Infrastructure.Managers.Identity.Users
@@ -49,6 +50,7 @@
 @inject IHotelAccomodationManager _hotelAccomodationManager
 @inject IHotelRoomAccomodationTypeManager _hotelRoomAccomodationTypeManager
 @inject IHotelRoomTypesManager _hotelRoomTypesManager
+@inject IHotelManager _hotelManager
 
 @*SnackBar*@
 @inject ISnackbar Snackbar

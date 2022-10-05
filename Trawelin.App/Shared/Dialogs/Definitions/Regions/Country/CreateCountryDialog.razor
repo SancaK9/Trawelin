@@ -1,19 +1,19 @@
-﻿
+﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<CreateCountryDialog> _localizer
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Material.Filled.Create" Class="mr-3 mb-n1" />
-            Create Country?
+            @_localizer["Title"]
         </MudText>
     </TitleContent>
     <DialogContent>
-        <MudTextField @bind-Value="@createCountryCommand.Name" Label="Isim" />
-        <MudTextField @bind-Value="@createCountryCommand.Code" Label="Kod" />
-        <MudTextField @bind-Value="@createCountryCommand.IsoCode" Label="IsoKod" />
+        <MudTextField @bind-Value="@createCountryCommand.Name" Label="@_localizer["Name"]" />
+        <MudTextField @bind-Value="@createCountryCommand.Code" Label="@_localizer["Code"]" />
+        <MudTextField @bind-Value="@createCountryCommand.IsoCode" Label="@_localizer["IsoCode"]" />
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Success" OnClick="CreateCountry">Ekle</MudButton>
+        <MudButton OnClick="Cancel">@_localizer["CancelButton"]</MudButton>
+        <MudButton Color="Color.Success" OnClick="CreateCountry">@_localizer["CreateButton"]</MudButton>
     </DialogActions>
 </MudDialog>
 

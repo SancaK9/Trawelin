@@ -1,19 +1,19 @@
-﻿
+﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<EditDistrictDialog> _localizer
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Material.Filled.Create" Class="mr-3 mb-n1" />
-            Edit District?
+            @_localizer["Title"]
         </MudText>
     </TitleContent>
     <DialogContent>
-        <MudTextField @bind-Value="@updateDistrictCommand.Id" Label="Id" ReadOnly="true" />
-        <MudTextField @bind-Value="@updateDistrictCommand.Name" Label="Isim" />
+        <MudTextField @bind-Value="@updateDistrictCommand.Id" Label="@_localizer["CityId"]" ReadOnly="true" />
+        <MudTextField @bind-Value="@updateDistrictCommand.Name" Label="@_localizer["Name"]" />
 
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Info" OnClick="EditDistrict">Duzenle</MudButton>
+        <MudButton OnClick="Cancel">@_localizer["CancelButton"]</MudButton>
+        <MudButton Color="Color.Info" OnClick="EditDistrict">@_localizer["EditButton"]</MudButton>
     </DialogActions>
 </MudDialog>
 

@@ -1,0 +1,197 @@
+﻿@page "/hotels"
+@using Trawelin.App.Shared.Dialogs.Hotels
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Hotels> _localizer
+
+@if (IsTaskRunning)
+{
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudDataGrid T="HotelDto" @ref="_mudTable" MultiSelection="true" Items="@hotelList" SortMode="SortMode.Multiple" Filterable="true"
+             Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" QuickFilter="@_quickFilter" Striped="true" Bordered="true">
+        <ToolBarContent>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">@_localizer["CreateButton"]</MudButton>
+                <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
+                <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
+
+            <MudSpacer />
+            <MudText Typo="Typo.h4">@_localizer["Title"]</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="@_localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <Columns>
+            <SelectColumn T="HotelDto" />
+            <Column T="HotelDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
+            <Column T="HotelDto"  Field="Name" Title="@_localizer["Name"]" />
+            
+
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="HotelDto" />
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    private MudDataGrid<HotelDto> _mudTable;
+
+    private List<HotelDto> selectedItems;
+
+    private List<HotelDto> hotelList;
+    string result = "";
+    bool editActive = false;
+    bool deleteActive = false;
+
+    //Search Bar String
+    string _searchString;
+
+    bool IsTaskRunning = true;
+
+    DialogOptions options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+
+
+    //QuickFilter Function
+    private Func<HotelDto, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+
+
+        return false;
+    };
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
+        {
+            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
+        }
+        //Service Init
+        Client service = new Client("https://api.trawelin.com", _httpClient);
+        //Get Token From Service
+        var response = await _hotelManager.GetHotelAsync();
+        IsTaskRunning = false;
+        if (response.Succeeded == true)
+        {
+            hotelList = response.Data.ToList();
+        }
+        else
+        {
+            result = response.Error.Message;
+        }
+    }
+
+    void SelectedItemsChanged(HashSet<HotelDto> items)
+    {
+        selectedItems = items.ToList();
+
+        editActive = selectedItems.Count == 1;
+        deleteActive = selectedItems.Count > 0;
+
+    }
+
+
+
+    async Task DeleteButton()
+    {
+        HotelDto hotelDto = selectedItems[0];
+        var parameters = new DialogParameters { ["hotelDto"] = hotelDto };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<DeleteHotelDialog>("Delete Hotel", parameters, options);
+        var result = await dialog.Result;
+        HotelDto modalData = result.Data as HotelDto;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                var response = await _hotelManager.DeleteHotelAsync(modalData.Id);
+                if (response.Succeeded)
+                {
+
+                    _mudTable.SetSelectedItemAsync(hotelDto);
+                    hotelList.Remove(hotelDto);
+                    Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+    async Task EditButton()
+    {
+        HotelDto hotelDto = selectedItems[0];
+        UpdateHotelCommand updateHotelCommand = _mapper.Map<UpdateHotelCommand>(hotelDto);
+        var parameters = new DialogParameters { ["updateHotelCommand"] = updateHotelCommand };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<EditHotelDialog>("Edit Hotel", parameters, options);
+        var result = await dialog.Result;
+        UpdateHotelCommand modalData = result.Data as UpdateHotelCommand;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                var response = await _hotelManager.UpdateHotelAsync(modalData);
+                if (response.Succeeded)
+                {
+                    hotelList.Remove(hotelDto);
+                    hotelList.Add(response.Data);
+                    _mudTable.SetSelectedItemAsync(hotelDto);
+                    Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+    async Task CreateButton()
+    {
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true, DisableBackdropClick = true };
+        var dialog = DialogService.Show<CreateHotelDialog>("Create Hotel", options);
+        var result = await dialog.Result;
+
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                CreateHotelCommand createHotelCommand = result.Data as CreateHotelCommand;
+                var response = await _hotelManager.CreateHotelAsync(createHotelCommand);
+                if (response.Succeeded)
+                {
+                    if (response.Succeeded)
+                    {
+                        hotelList.Add(response.Data);
+                        Snackbar.Add("Isleminiz Basarili", Severity.Success);
+                    }
+                    else
+                    {
+                        Console.Write(response.Error.Message);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+
+    }
+
+}
