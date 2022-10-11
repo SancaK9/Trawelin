@@ -1,0 +1,47 @@
+﻿
+
+<MudAutocomplete Class="pa-4" @ref="@categoryAuto" T="CategoryDto" Label="Category" SearchFunc="@SearchCategory" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnCategoryValueChanged" />
+
+@code {
+    [Parameter]
+    public int categoryId { get; set; }
+
+    [Parameter]
+    public EventCallback<CategoryDto> CategoryChanged { get; set; }
+
+    private MudAutocomplete<CategoryDto> categoryAuto;
+    List<CategoryDto> categoryDtos { get; set; } = new List<CategoryDto>();
+    protected override async Task OnInitializedAsync()
+    {
+
+        var categoryResponse = await _hotelCategoriesManager.GetCategoryAsync();
+        if (categoryResponse.Succeeded == true)
+        {
+            categoryDtos = categoryResponse.Data.ToList();
+        }
+        if (categoryId != 0) {
+
+            var selectedCategory = await _hotelCategoriesManager.GetCategoryByIdAsync(categoryId);
+            categoryAuto.SelectOption(selectedCategory.Data);
+        }
+
+    }
+
+
+    //
+    private Task OnCategoryValueChanged(CategoryDto category)
+    {
+        CategoryChanged.InvokeAsync(category);
+        return Task.CompletedTask;
+    }
+    //
+    private async Task<IEnumerable<CategoryDto>> SearchCategory(string value)
+    {
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return categoryDtos;
+        return categoryDtos.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+}
+

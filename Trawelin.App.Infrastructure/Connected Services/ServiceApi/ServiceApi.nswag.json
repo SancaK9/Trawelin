@@ -1156,6 +1156,192 @@
         }
       }
     },
+    "/api/HotelRooms/{HotelId}": {
+      "get": {
+        "tags": [
+          "HotelRooms"
+        ],
+        "summary": "Get HotelRoom by Id",
+        "operationId": "HotelRoomsGET",
+        "parameters": [
+          {
+            "name": "HotelId",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotelRoomDtoServiceResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotelRoomDtoServiceResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotelRoomDtoServiceResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/HotelRooms": {
+      "post": {
+        "tags": [
+          "HotelRooms"
+        ],
+        "summary": "Create HotelRoom",
+        "operationId": "HotelRoomsPOST",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHotelRoomCommand"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHotelRoomCommand"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHotelRoomCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotelRoomDtoServiceResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotelRoomDtoServiceResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotelRoomDtoServiceResult"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "HotelRooms"
+        ],
+        "summary": "Update HotelRoom",
+        "operationId": "HotelRoomsPUT",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHotelRoomCommand"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHotelRoomCommand"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHotelRoomCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotelRoomDtoServiceResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotelRoomDtoServiceResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotelRoomDtoServiceResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/HotelRooms/{id}": {
+      "delete": {
+        "tags": [
+          "HotelRooms"
+        ],
+        "summary": "Delete HotelRoom by Id",
+        "operationId": "HotelRoomsDELETE",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotelRoomDtoServiceResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotelRoomDtoServiceResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HotelRoomDtoServiceResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Hotels": {
       "get": {
         "tags": [
@@ -2846,6 +3032,51 @@
   },
   "components": {
     "schemas": {
+      "Accomodation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "hotelAccomodations": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/HotelAccomodation"
+            }
+          },
+          "domainEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DomainEvent"
+            }
+          }
+        }
+      },
       "AccomodationDto": {
         "type": "object",
         "additionalProperties": false,
@@ -2961,6 +3192,44 @@
           }
         }
       },
+      "Category": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "domainEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DomainEvent"
+            }
+          }
+        }
+      },
       "CategoryDto": {
         "type": "object",
         "additionalProperties": false,
@@ -3012,6 +3281,54 @@
           },
           "data": {
             "$ref": "#/components/schemas/CategoryDto"
+          }
+        }
+      },
+      "City": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "countryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "country": {
+            "$ref": "#/components/schemas/Country"
+          },
+          "domainEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DomainEvent"
+            }
           }
         }
       },
@@ -3097,6 +3414,55 @@
           "lat": {
             "type": "number",
             "format": "double"
+          }
+        }
+      },
+      "Country": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "isoCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "domainEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DomainEvent"
+            }
           }
         }
       },
@@ -3240,6 +3606,24 @@
             "$ref": "#/components/schemas/HotelGeneralCommandDto"
           },
           "supplierId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CreateHotelRoomCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "hotelId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "roomAccomodationTypeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "roomTypeId": {
             "type": "integer",
             "format": "int32"
           }
@@ -3423,6 +3807,44 @@
           }
         }
       },
+      "District": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "cityId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "city": {
+            "$ref": "#/components/schemas/City"
+          }
+        }
+      },
       "DistrictDto": {
         "type": "object",
         "additionalProperties": false,
@@ -3480,6 +3902,20 @@
           }
         }
       },
+      "DomainEvent": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "dateOccurred": {
+            "type": "string",
+            "readOnly": true,
+            "format": "date-time"
+          },
+          "isPublished": {
+            "type": "boolean"
+          }
+        }
+      },
       "GetTokenQuery": {
         "type": "object",
         "additionalProperties": false,
@@ -3491,6 +3927,108 @@
           "password": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "Hotel": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "general": {
+            "$ref": "#/components/schemas/HotelGeneral"
+          },
+          "supplierId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "supplier": {
+            "$ref": "#/components/schemas/Supplier"
+          },
+          "hotelAccomodations": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/HotelAccomodation"
+            }
+          },
+          "hotelRooms": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/HotelRoom"
+            }
+          },
+          "domainEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DomainEvent"
+            }
+          }
+        }
+      },
+      "HotelAccomodation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "accomodation": {
+            "$ref": "#/components/schemas/Accomodation"
+          },
+          "hotel": {
+            "$ref": "#/components/schemas/Hotel"
+          },
+          "domainEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DomainEvent"
+            }
           }
         }
       },
@@ -3569,6 +4107,84 @@
           },
           "data": {
             "$ref": "#/components/schemas/HotelDto"
+          }
+        }
+      },
+      "HotelGeneral": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "categoryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "regionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "region": {
+            "$ref": "#/components/schemas/Village"
+          },
+          "hotelTypeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hotelType": {
+            "$ref": "#/components/schemas/HotelType"
+          },
+          "emails": {
+            "type": "string",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "manager": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "domainEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DomainEvent"
+            }
           }
         }
       },
@@ -3671,6 +4287,61 @@
           }
         }
       },
+      "HotelRoom": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hotelId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hotel": {
+            "$ref": "#/components/schemas/Hotel"
+          },
+          "roomAccomodationTypeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "roomAccomodationType": {
+            "$ref": "#/components/schemas/RoomAccomodationType"
+          },
+          "roomTypeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "roomType": {
+            "$ref": "#/components/schemas/RoomType"
+          },
+          "domainEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DomainEvent"
+            }
+          }
+        }
+      },
       "HotelRoomDto": {
         "type": "object",
         "additionalProperties": false,
@@ -3679,15 +4350,91 @@
             "type": "integer",
             "format": "int32"
           },
+          "hotelId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hotel": {
+            "$ref": "#/components/schemas/Hotel"
+          },
+          "roomAccomodationTypeId": {
+            "type": "integer",
+            "format": "int32"
+          },
           "roomAccomodationType": {
-            "$ref": "#/components/schemas/RoomAccomodationTypeDto"
+            "$ref": "#/components/schemas/RoomAccomodationType"
+          },
+          "roomTypeId": {
+            "type": "integer",
+            "format": "int32"
           },
           "roomType": {
-            "$ref": "#/components/schemas/RoomTypeDto"
+            "$ref": "#/components/schemas/RoomType"
           },
           "createDate": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "HotelRoomDtoServiceResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "succeeded": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "error": {
+            "$ref": "#/components/schemas/ServiceError"
+          },
+          "data": {
+            "$ref": "#/components/schemas/HotelRoomDto"
+          }
+        }
+      },
+      "HotelType": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "hotelGeneral": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/HotelGeneral"
+            }
+          },
+          "domainEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DomainEvent"
+            }
           }
         }
       },
@@ -3818,10 +4565,27 @@
           }
         }
       },
-      "RoomAccomodationTypeDto": {
+      "RoomAccomodationType": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "id": {
             "type": "integer",
             "format": "int32"
@@ -3850,8 +4614,45 @@
             "type": "array",
             "nullable": true,
             "items": {
-              "$ref": "#/components/schemas/HotelRoomDto"
+              "$ref": "#/components/schemas/HotelRoom"
             }
+          },
+          "domainEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DomainEvent"
+            }
+          }
+        }
+      },
+      "RoomAccomodationTypeDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "minAdult": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxAdult": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minChildren": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxChildren": {
+            "type": "integer",
+            "format": "int32"
           },
           "createDate": {
             "type": "string",
@@ -3895,10 +4696,27 @@
           }
         }
       },
-      "RoomTypeDto": {
+      "RoomType": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "id": {
             "type": "integer",
             "format": "int32"
@@ -3911,8 +4729,29 @@
             "type": "array",
             "nullable": true,
             "items": {
-              "$ref": "#/components/schemas/HotelRoomDto"
+              "$ref": "#/components/schemas/HotelRoom"
             }
+          },
+          "domainEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DomainEvent"
+            }
+          }
+        }
+      },
+      "RoomTypeDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
           },
           "createDate": {
             "type": "string",
@@ -3981,6 +4820,66 @@
           "_3h": {
             "type": "number",
             "format": "double"
+          }
+        }
+      },
+      "Supplier": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "villageId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "village": {
+            "$ref": "#/components/schemas/Village"
+          },
+          "hotels": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/Hotel"
+            }
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "taxNum": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "domainEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DomainEvent"
+            }
           }
         }
       },
@@ -4181,6 +5080,28 @@
           }
         }
       },
+      "UpdateHotelRoomCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hotelId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "roomAccomodationTypeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "roomTypeId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "UpdateHotelTypeCommand": {
         "type": "object",
         "additionalProperties": false,
@@ -4290,6 +5211,44 @@
           "name": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "Village": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "districtId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "district": {
+            "$ref": "#/components/schemas/District"
           }
         }
       },

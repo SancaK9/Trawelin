@@ -93,7 +93,7 @@ else
         }
         else
         {
-            result = response.Error.Message;
+            Snackbar.Add(response.Error.Message, Severity.Error);
         }
     }
 
@@ -140,35 +140,9 @@ else
 
     async Task EditButton()
     {
-        HotelDto hotelDto = selectedItems[0];
-        UpdateHotelCommand updateHotelCommand = _mapper.Map<UpdateHotelCommand>(hotelDto);
-        var parameters = new DialogParameters { ["updateHotelCommand"] = updateHotelCommand };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
-        var dialog = DialogService.Show<EditHotelDialog>("Edit Hotel", parameters, options);
-        var result = await dialog.Result;
-        UpdateHotelCommand modalData = result.Data as UpdateHotelCommand;
-
-        if (!result.Cancelled)
-        {
-            try
-            {
-                var response = await _hotelManager.UpdateHotelAsync(modalData);
-                if (response.Succeeded)
-                {
-                    hotelList.Remove(hotelDto);
-                    hotelList.Add(response.Data);
-                    _mudTable.SetSelectedItemAsync(hotelDto);
-                    Snackbar.Add("Isleminiz Basarili", Severity.Success);
-                }
-            }
-            catch (Exception ex)
-            {
-                Snackbar.Add(ex.Message, Severity.Error);
-            }
-        }
+        _navigationManager.NavigateTo("hoteldetails" + "/" + selectedItems[0].Id);
 
     }
-
     async Task CreateButton()
     {
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true, DisableBackdropClick = true };

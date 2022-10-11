@@ -1,0 +1,49 @@
+﻿@page "/hoteldetails/{id}"
+@using Trawelin.App.Infrastructure.Settings
+
+<MudTabs Elevation="4" KeepPanelsAlive="true" Rounded="true" AlwaysShowScrollButtons="true" Color="Color.Info" Class="mt-4">
+
+    <MudTabPanel Text="Hotel Details"> 
+        <Trawelin.App.Shared.TabPanels.Hotel.HotelDetails.HotelDetailTabPanel id="int.Parse(id)"/>
+    </MudTabPanel>
+
+    <MudTabPanel Text="Room Types"> 
+        <Trawelin.App.Shared.TabPanels.Hotel.HotelDetails.HotelRoomTabPanel id="int.Parse(id)" />
+    </MudTabPanel>
+
+
+    <MudTabPanel Text="Prices" />
+
+
+</MudTabs>
+
+
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+
+    bool IsTaskRunning = true;
+
+    HotelDto currentHotel = new();
+
+    Color color;
+    protected override async Task OnInitializedAsync()
+    {
+        if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
+        {
+            _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
+        }
+
+        var response = await _hotelManager.GetHotelByIdAsync(int.Parse(id));
+        IsTaskRunning = false;
+        if (response.Succeeded == true)
+        {
+            currentHotel = response.Data;
+        }
+        else
+        {
+            Snackbar.Add(response.Error.Message, Severity.Error);
+        }
+    }
+}

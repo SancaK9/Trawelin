@@ -1,10 +1,10 @@
 ﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<RegionSelector> _localizer
 
 
-<MudAutocomplete @ref="@countryAuto" T="CountryDto" Label="@_localizer["SelectCountry"]" SearchFunc="@SearchCountry" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnCountryValueChanged" />
-<MudAutocomplete @ref="@cityAuto" T="CityDto" Label="@_localizer["SelectCity"]" SearchFunc="@SearchCity" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnCityValueChanged" />
-<MudAutocomplete @ref="@districtAuto" T="DistrictDto" Label="@_localizer["SelectDistrict"]" SearchFunc="@SearchDistrict" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnDistrictValueChanged" />
-<MudAutocomplete @ref="@villageAuto" T="VillageDto" Label="@_localizer["SelectVillage"]" SearchFunc="@SearchVillage" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnVillageValueChanged" />
+<MudAutocomplete Class="pa-4" @ref="@countryAuto" T="CountryDto" Label="@_localizer["SelectCountry"]" SearchFunc="@SearchCountry" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnCountryValueChanged" />
+<MudAutocomplete Class="pa-4" @ref="@cityAuto" T="CityDto" Label="@_localizer["SelectCity"]" SearchFunc="@SearchCity" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnCityValueChanged" />
+<MudAutocomplete Class="pa-4" @ref="@districtAuto" T="DistrictDto" Label="@_localizer["SelectDistrict"]" SearchFunc="@SearchDistrict" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnDistrictValueChanged" />
+<MudAutocomplete Class="pa-4" @ref="@villageAuto" T="VillageDto" Label="@_localizer["SelectVillage"]" SearchFunc="@SearchVillage" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnVillageValueChanged" />
 
 
 
@@ -43,8 +43,6 @@
         {
             _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
         }
-        //Service Init
-        Client service = new Client("https://api.trawelin.com", _httpClient);
 
         var response = await _regionManager.GetCountryAsync();
         if (response.Succeeded == true)

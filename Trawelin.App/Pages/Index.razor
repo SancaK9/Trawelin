@@ -1,5 +1,109 @@
 ﻿@page "/index"
-<MudGrid>
+@using BlazorTemplater
+@using Trawelin.App.Shared.Components
+
+<MudDynamicTabs Elevation="4" Rounded="true" KeepPanelsAlive="true" ApplyEffectsToContainer="true" PanelClass="px-4 py-6" AddTab="AddTabCallback" CloseTab="@((panel) => CloseTabCallback(panel))" @bind-ActivePanelIndex="_index" AddIconToolTip="Click here to add a new tab" CloseIconToolTip="Close this tab. All data will be lost">
+    @foreach (var item in _tabs)
+    {
+		<MudTabPanel Text="@item.Name" Tag="@item.Id">@item.Content</MudTabPanel>
+	}
+</MudDynamicTabs>
+
+
+
+
+@code {
+
+	private class TabView
+	{
+		public String Name { get; set; }
+		public RenderFragment Content { get; set; }
+		public Guid Id { get; set; }
+	}
+
+	public List<RenderFragment> renderList = new List<RenderFragment>();
+	public List<String> stringList = new List<string>();
+
+	static readonly RenderFragment renderContent = __builder =>
+    {
+        <DynamicComponent Type="typeof(Hotels.Hotels)"></DynamicComponent>
+    };
+	static readonly RenderFragment renderContent2 = __builder =>
+	{
+		<DynamicComponent Type="typeof(Users.Users)"></DynamicComponent>
+	};
+	static readonly RenderFragment renderContent3 = __builder =>
+	{
+		<DynamicComponent Type="typeof(Definitions.Regions.CountryDefinition)"></DynamicComponent>
+	};
+	static readonly RenderFragment renderContent4 = __builder =>
+	{
+		<DynamicComponent Type="typeof(Definitions.Suppliers.SuppliersDefinition)"></DynamicComponent>
+	};
+	static readonly RenderFragment renderContent5 = __builder =>
+	{
+		<DynamicComponent Type="typeof(Definitions.Hotel.Accomodation.HotelAccomodationDefinition)"></DynamicComponent>
+	};
+
+	private List<TabView> _tabs = new();
+	private int _index = 0;
+	private bool _updateIndex = false;
+
+
+	protected override void OnInitialized()
+	{
+		_tabs.Add(new TabView { Name = "Accomodation", Content = renderContent5, Id = Guid.NewGuid() });
+
+		renderList.Add(renderContent);
+		renderList.Add(renderContent2);
+		renderList.Add(renderContent3);
+		renderList.Add(renderContent4);
+		stringList.Add("Hotel");
+		stringList.Add("Users");
+		stringList.Add("Regions");
+		stringList.Add("Suppliers");
+		base.OnInitialized();
+
+	}
+
+	public void AddTabCallback()
+	{
+		_tabs.Add(new TabView { Name = stringList[0], Content = renderList[0], Id = Guid.NewGuid() });
+		//the tab becomes available after it is rendered. Hence, we can't set the index here
+		renderList.Remove(renderList[0]);
+		stringList.Remove(stringList[0]);
+		_updateIndex = true;
+	}
+
+
+
+	private void CloseTabCallback(MudTabPanel panel)
+	{
+		var tabView = _tabs.FirstOrDefault(x => x.Id == (Guid)panel.Tag);
+		if(tabView != null)
+		{
+			_tabs.Remove(tabView);
+		}
+	}
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+		if(_updateIndex == true)
+		{
+			_index = _tabs.Count - 1;
+			
+			StateHasChanged();
+			_updateIndex = false;
+		}
+	}
+	
+
+
+}
+
+
+
+@*<MudGrid>
     <MudItem xs="12" sm="6" md="3">
         <MudPaper Elevation="25" Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
             <MudIcon Icon="@Icons.Material.Filled.ViewCarousel" Color="Color.Primary" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
@@ -20,4 +124,4 @@
     </MudItem>
     
    
-</MudGrid>
+</MudGrid>*@

@@ -1,0 +1,48 @@
+﻿
+
+<MudAutocomplete Class="pa-4" @ref="@hotelTypeAuto" T="HotelTypeDto" Label="Hotel Type" SearchFunc="@SearchHotelType" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" ValueChanged="OnHotelTypeValueChanged" />
+
+@code {
+    [Parameter]
+    public int hotelTypeId { get; set; }
+
+    [Parameter]
+    public EventCallback<HotelTypeDto> HotelTypeChanged { get; set; }
+
+    private MudAutocomplete<HotelTypeDto> hotelTypeAuto;
+    List<HotelTypeDto> hotelTypeDtos { get; set; } = new List<HotelTypeDto>();
+    protected override async Task OnInitializedAsync()
+    {
+
+        var categoryResponse = await _hotelTypeManager.GetHotelTypeAsync();
+        if (categoryResponse.Succeeded == true)
+        {
+            hotelTypeDtos = categoryResponse.Data.ToList();
+        }
+        if (hotelTypeId != 0)
+        {
+
+            var selectedHotelType = await _hotelTypeManager.GetHotelTypeByIdAsync(hotelTypeId);
+            hotelTypeAuto.SelectOption(selectedHotelType.Data);
+        }
+
+    }
+
+
+    //
+    private Task OnHotelTypeValueChanged(HotelTypeDto category)
+    {
+        HotelTypeChanged.InvokeAsync(category);
+        return Task.CompletedTask;
+    }
+    //
+    private async Task<IEnumerable<HotelTypeDto>> SearchHotelType(string value)
+    {
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return hotelTypeDtos;
+        return hotelTypeDtos.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+}
+

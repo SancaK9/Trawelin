@@ -1,0 +1,48 @@
+﻿
+
+<MudAutocomplete Class="pa-4" @ref="@supplierAuto" T="SupplierDto" Label="Supplier" SearchFunc="@SearchSupplier" ResetValueOnEmptyText="true" ToStringFunc="@(e=> e==null?null : $"{e.Title}")" ValueChanged="OnSupplierValueChanged" />
+
+@code {
+    [Parameter]
+    public int supplierId { get; set; }
+
+    [Parameter]
+    public EventCallback<SupplierDto> SupplierChanged { get; set; }
+
+    private MudAutocomplete<SupplierDto> supplierAuto;
+    List<SupplierDto> suppliersDtos { get; set; } = new List<SupplierDto>();
+    protected override async Task OnInitializedAsync()
+    {
+
+        var supplierResponse = await _suppliersManager.GetSuppliersAsync();
+        if (supplierResponse.Succeeded == true)
+        {
+            suppliersDtos = supplierResponse.Data.ToList();
+        }
+        if (supplierId != 0)
+        {
+
+            var selectedSupplier = await _suppliersManager.GetSupplierByIdAsync(supplierId);
+            supplierAuto.SelectOption(selectedSupplier.Data);
+        }
+
+    }
+
+
+    //
+    private Task OnSupplierValueChanged(SupplierDto category)
+    {
+        SupplierChanged.InvokeAsync(category);
+        return Task.CompletedTask;
+    }
+    //
+    private async Task<IEnumerable<SupplierDto>> SearchSupplier(string value)
+    {
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return suppliersDtos;
+        return suppliersDtos.Where(x => x.Title.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+}
+

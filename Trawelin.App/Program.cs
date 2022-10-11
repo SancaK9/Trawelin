@@ -8,6 +8,8 @@ using Trawelin.App.Infrastructure.Constants.Localization;
 using Trawelin.App.Infrastructure.Managers;
 using Trawelin.App.Infrastructure.Managers.Preferences;
 using Trawelin.App.Infrastructure.Settings;
+using MudBlazor;
+using Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -22,8 +24,6 @@ builder.Services.AddLocalization(options =>
 {
     options.ResourcesPath = "Resources";
 });
-
-
 
 
 //Managers Init
