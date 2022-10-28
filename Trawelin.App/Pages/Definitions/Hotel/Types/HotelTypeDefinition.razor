@@ -1,8 +1,7 @@
 ﻿@page "/hotelTypes"
-@using Trawelin.App.Shared.Dialogs.Definitions.Hotel.Type
 @inject Microsoft.Extensions.Localization.IStringLocalizer<HotelTypeDefinition> _localizer
 
-<Trawelin.App.Shared.Components.ComponentTitle Title="Hotel Types" Description="Manage Hotel Types" />
+<ComponentTitle Title="Hotel Types" Description="Manage Hotel Types" />
 @if (IsTaskRunning)
 {
 	<MudProgressCircular Color="Color.Primary" Indeterminate="true" />
@@ -12,9 +11,9 @@
     <ToolBarContent>
             <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">@_localizer["CreateButton"]</MudButton>
 
-        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!buttonActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
 
-            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!buttonActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
 
         <MudSpacer />
             @*<MudText Typo="Typo.h4">@_localizer["Title"]</MudText>*@
@@ -38,31 +37,33 @@
 @code {
     //DataGrid Table
     private MudDataGrid<HotelTypeDto> _mudTable;
+
     //DataGrid Data
     private List<HotelTypeDto> hotelTypeList = new List<HotelTypeDto>();
     private List<HotelTypeDto> selectedItems;
-    //Response Message
-    string result = "";
 
     //Button Active Check
-    bool editActive = false;
-    bool deleteActive = false;
+    bool buttonActive = false;
 
     //Search Bar String
     string _searchString;
 
-    bool IsTaskRunning = true;
+    //Dialog Settings
     DialogOptions options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+
+    bool IsTaskRunning = true;
+
     protected override async Task OnInitializedAsync()
     {
+        //Set Bearer if Auth Null
         if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
         {
             _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
         }
-        //Service Init
-        Client service = new Client("https://api.trawelin.com", _httpClient);
-        //Get Token From Service
+
+        //Get Hotel Type From Service
         var response = await _hotelTypeManager.GetHotelTypeAsync();
+
         IsTaskRunning = false;
         if (response.Succeeded == true)
         {
@@ -70,11 +71,11 @@
         }
         else
         {
-            result = response.Error.Message;
+            Snackbar.Add(response.Error.Message, Severity.Error);
         }
     }
 
-
+    //Quick Filter
     private Func<HotelTypeDto, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
@@ -82,7 +83,6 @@
 
         if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-
 
         return false;
     };
@@ -92,19 +92,23 @@
     void SelectedItemsChanged(HashSet<HotelTypeDto> items)
     {
         selectedItems = items.ToList();
-
-        editActive = selectedItems.Count == 1;
-        deleteActive = selectedItems.Count > 0;
+        buttonActive = selectedItems.Count == 1;
     }
 
 
 
     async Task DeleteButton()
     {
+        //Get Selected Item From Datatable
         HotelTypeDto hotelTypeDto = selectedItems[0];
+        
+        //Dialog Parameter
         var parameters = new DialogParameters { ["hotelTypeDto"] = hotelTypeDto };
-
+        
+        //Dialog
         var dialog = DialogService.Show<DeleteHotelTypeDialog>("Delete Category", parameters, options);
+        
+        //Dialog Result
         var result = await dialog.Result;
         HotelTypeDto modalData = result.Data as HotelTypeDto;
 
@@ -115,7 +119,6 @@
                 var response = await _hotelTypeManager.DeleteHotelTypeAsync(modalData.Id);
                 if (response.Succeeded)
                 {
-
                     _mudTable.SetSelectedItemAsync(hotelTypeDto);
                     hotelTypeList.Remove(hotelTypeDto);
                     Snackbar.Add("Isleminiz Basarili", Severity.Success);
@@ -131,11 +134,17 @@
 
     async Task EditButton()
     {
+        //Get Selected Item From Datatable
         HotelTypeDto hotelTypeDto = selectedItems[0];
+        
+        //Dialog Parameter
         UpdateHotelTypeCommand updateHotelTypeCommand = _mapper.Map<UpdateHotelTypeCommand>(hotelTypeDto);
         var parameters = new DialogParameters { ["updateHotelTypeCommand"] = updateHotelTypeCommand };
-
+        
+        //Dialog
         var dialog = DialogService.Show<EditHotelTypeDialog>("Edit Category", parameters, options);
+        
+        //Dialog Result
         var result = await dialog.Result;
         UpdateHotelTypeCommand modalData = result.Data as UpdateHotelTypeCommand;
 
@@ -162,10 +171,11 @@
 
     async Task CreateButton()
     {
-        
+        //Dialog
         var dialog = DialogService.Show<CreateHotelTypeDialog>("Create Category", options);
+        
+        //Dialog Result
         var result = await dialog.Result;
-
 
         if (!result.Cancelled)
         {
@@ -182,7 +192,7 @@
                     }
                     else
                     {
-                        Console.Write(response.Error.Message);
+                        Snackbar.Add(response.Error.Message, Severity.Error);
                     }
                 }
             }

@@ -1,45 +1,37 @@
-﻿@using Trawelin.App.Shared.Dialogs.Definitions.Hotel.RoomType
-@if (IsTaskRunning)
+﻿@if (IsTaskRunning)
 {
     <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
 }
 else
 {
-     <MudDataGrid T="HotelRoomDto" @ref="_mudTable" MultiSelection="true" Items="@hotelRoomTypeList" SortMode="SortMode.Multiple" Filterable="true"
+    <MudDataGrid T="HotelRoomDto" @ref="_mudTable" MultiSelection="true" Items="@hotelRoomTypeList" SortMode="SortMode.Multiple" Filterable="true"
              QuickFilter="@_quickFilter" Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" Striped="true" Bordered="true">
-            <ToolBarContent>
-                <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Create</MudButton>
+        <ToolBarContent>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Create</MudButton>
 
-                <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!buttonActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
 
-                <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">Edit</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!buttonActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">Edit</MudButton>
 
-                <MudSpacer />
-            @*<MudText Typo="Typo.h4">@_localizer["Title"]</MudText>*@
-                <MudSpacer />
-                <MudTextField @bind-Value="_searchString" Placeholder="Test" Adornment="Adornment.Start" Immediate="true"
+            <MudTextField @bind-Value="_searchString" Placeholder="Test" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-            </ToolBarContent>
-            <Columns>
-                <SelectColumn T="HotelRoomDto" />
-                <Column T="HotelRoomDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
+        </ToolBarContent>
+        <Columns>
+            <SelectColumn T="HotelRoomDto" />
+            <Column T="HotelRoomDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
 
-                <Column T="HotelRoomDto" Field="Name" Title="Test" Sortable="false" Filterable="false" IsEditable="false" />
+            <Column T="HotelRoomDto" Field="Name" Title="Name" Sortable="false" Filterable="false" IsEditable="false" />
 
-            </Columns>
-            <PagerContent>
-                <MudDataGridPager T="HotelRoomDto" />
-            </PagerContent>
-        </MudDataGrid>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="HotelRoomDto" />
+        </PagerContent>
+    </MudDataGrid>
 }
 @code {
 
     [Parameter]
     public int id { get; set; }
-
-    bool IsTaskRunning = true;
-
-
 
     //DataGrid Table
     private MudDataGrid<HotelRoomDto> _mudTable;
@@ -47,18 +39,17 @@ else
     private List<HotelRoomDto> hotelRoomTypeList = new List<HotelRoomDto>();
     private List<HotelRoomDto> selectedItems;
     private HotelRoomDto test = new HotelRoomDto();
-    //Response Message
-    string result = "";
 
     //Button Active Check
-    bool editActive = false;
-    bool deleteActive = false;
+    bool buttonActive = false;
 
     //Search Bar String
     string _searchString;
 
+    //Dialog Settings
     DialogOptions options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
 
+    bool IsTaskRunning = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,12 +57,13 @@ else
         if (response.Succeeded == true)
         {
             test = response.Data;
+            IsTaskRunning = false;
         }
         else
         {
-            result = response.Error.Message;
+            Snackbar.Add(response.Error.Message, Severity.Error);
         }
-        IsTaskRunning = false;
+
 
     }
 
@@ -92,9 +84,7 @@ else
     void SelectedItemsChanged(HashSet<HotelRoomDto> items)
     {
         selectedItems = items.ToList();
-
-        editActive = selectedItems.Count == 1;
-        deleteActive = selectedItems.Count > 0;
+        buttonActive = selectedItems.Count == 1;
     }
 
 

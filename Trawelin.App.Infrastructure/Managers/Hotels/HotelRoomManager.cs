@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Trawelin.App.Infrastructure.Constants.Storage;
+﻿using Trawelin.App.Infrastructure.Constants.Storage;
 using Trawelin.App.Infrastructure.ServiceApi;
 
 namespace Trawelin.App.Infrastructure.Managers.Hotels
@@ -17,33 +12,28 @@ namespace Trawelin.App.Infrastructure.Managers.Hotels
             _httpClient = httpClient;
         }
      
-        
         public async Task<HotelRoomDtoServiceResult> CreateHotelRoomAsync(CreateHotelRoomCommand createHotelRoomCommand)
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
-            var response = await service.ApiHotelRoomsPostAsync(createHotelRoomCommand);
-            return response;
+            return await service.ApiHotelRoomsPostAsync(createHotelRoomCommand);
         }
 
         public async Task<HotelRoomDtoServiceResult> DeleteHotelRoomAsync(int id)
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
-            var response = await service.ApiHotelRoomsDeleteAsync(id);
-            return response;
+            return await service.ApiHotelRoomsDeleteAsync(id);
         }
 
         public async Task<HotelRoomDtoServiceResult> GetHotelRoomByIdAsync(int id)
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
-            var response = await service.ApiHotelRoomsGetAsync(id);
-            return response;
+            return await service.ApiHotelRoomsGetAsync(id);
         }
 
         public async Task<HotelRoomDtoServiceResult> UpdateHotelRoomAsync(UpdateHotelRoomCommand updateHotelRoomCommand)
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
-            var response = await service.ApiHotelRoomsPutAsync(updateHotelRoomCommand);
-            return response;
+            return await service.ApiHotelRoomsPutAsync(updateHotelRoomCommand);
         }
     }
 }

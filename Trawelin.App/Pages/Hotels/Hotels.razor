@@ -1,12 +1,11 @@
 ﻿@page "/hotels"
-@using Trawelin.App.Shared.Dialogs.Hotels
 @inject Microsoft.Extensions.Localization.IStringLocalizer<Hotels> _localizer
 
-    <Trawelin.App.Shared.Components.ComponentTitle Title="Hotels" Description="Manage Hotels"/>
+<ComponentTitle Title="Hotels" Description="Manage Hotels" />
 
 @if (IsTaskRunning)
 {
-        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
 }
 else
 {
@@ -14,20 +13,17 @@ else
              Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" QuickFilter="@_quickFilter" Striped="true" Bordered="true">
         <ToolBarContent>
             <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">@_localizer["CreateButton"]</MudButton>
-                <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
-                <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!buttonActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!buttonActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
 
-            <MudSpacer />
-            @*<MudText Typo="Typo.h4">@_localizer["Title"]</MudText>*@
-            <MudSpacer />
             <MudTextField @bind-Value="_searchString" Placeholder="@_localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
         <Columns>
             <SelectColumn T="HotelDto" />
             <Column T="HotelDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
-            <Column T="HotelDto"  Field="Name" Title="@_localizer["Name"]" />
-            
+            <Column T="HotelDto" Field="Name" Title="@_localizer["Name"]" />
+
 
         </Columns>
         <PagerContent>
@@ -37,29 +33,24 @@ else
 }
 
 @code {
-    private List<BreadcrumbItem> _items = new List<BreadcrumbItem>
-    {
-        new BreadcrumbItem("Dashboard", href: "#", icon: Icons.Material.Filled.Home),
-        new BreadcrumbItem("Hotels", href: "#", icon: Icons.Material.Filled.VideoLibrary),
-        new BreadcrumbItem("Hotel List", href: null, disabled: true, icon: Icons.Material.Filled.Create)
-    };
 
+    //DataGrid Table
     private MudDataGrid<HotelDto> _mudTable;
 
+    //DataGrid Data
     private List<HotelDto> selectedItems;
-
     private List<HotelDto> hotelList;
-    string result = "";
-    bool editActive = false;
-    bool deleteActive = false;
+
+    //Button Active Check
+    bool buttonActive = false;
 
     //Search Bar String
     string _searchString;
 
-    bool IsTaskRunning = true;
-
+    //Dialog Settings
     DialogOptions options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
-
+    
+    bool IsTaskRunning = true;
 
     //QuickFilter Function
     private Func<HotelDto, bool> _quickFilter => x =>
@@ -70,22 +61,21 @@ else
         if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-
-
         return false;
     };
 
 
     protected override async Task OnInitializedAsync()
     {
+        //Set Bearer if Auth Null
         if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
         {
             _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
         }
-        //Service Init
-        Client service = new Client("https://api.trawelin.com", _httpClient);
-        //Get Token From Service
+
+        //Get Hotels From Service
         var response = await _hotelManager.GetHotelAsync();
+
         IsTaskRunning = false;
         if (response.Succeeded == true)
         {
@@ -100,9 +90,7 @@ else
     void SelectedItemsChanged(HashSet<HotelDto> items)
     {
         selectedItems = items.ToList();
-
-        editActive = selectedItems.Count == 1;
-        deleteActive = selectedItems.Count > 0;
+        buttonActive = selectedItems.Count == 1;
 
     }
 
@@ -110,10 +98,16 @@ else
 
     async Task DeleteButton()
     {
+        //Get Selected Item From Datatable
         HotelDto hotelDto = selectedItems[0];
+        
+        //Dialog Parameter
         var parameters = new DialogParameters { ["hotelDto"] = hotelDto };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        
+        //Dialog
         var dialog = DialogService.Show<DeleteHotelDialog>("Delete Hotel", parameters, options);
+        
+        //Dialog Result
         var result = await dialog.Result;
         HotelDto modalData = result.Data as HotelDto;
 
@@ -124,7 +118,6 @@ else
                 var response = await _hotelManager.DeleteHotelAsync(modalData.Id);
                 if (response.Succeeded)
                 {
-
                     _mudTable.SetSelectedItemAsync(hotelDto);
                     hotelList.Remove(hotelDto);
                     Snackbar.Add("Isleminiz Basarili", Severity.Success);
@@ -141,14 +134,15 @@ else
     async Task EditButton()
     {
         _navigationManager.NavigateTo("hoteldetails" + "/" + selectedItems[0].Id);
-
     }
+
     async Task CreateButton()
     {
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true, DisableBackdropClick = true };
+        //Dialog
         var dialog = DialogService.Show<CreateHotelDialog>("Create Hotel", options);
+        
+        //Dialog Result
         var result = await dialog.Result;
-
 
         if (!result.Cancelled)
         {
@@ -165,7 +159,7 @@ else
                     }
                     else
                     {
-                        Console.Write(response.Error.Message);
+                        Snackbar.Add(response.Error.Message, Severity.Error);
                     }
                 }
             }

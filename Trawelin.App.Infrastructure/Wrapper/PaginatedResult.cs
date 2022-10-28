@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace BlazorHero.CleanArchitecture.Shared.Wrapper
+﻿namespace BlazorHero.CleanArchitecture.Shared.Wrapper
 {
     public class PaginatedResult<T> : Result
     {
@@ -37,6 +34,7 @@ namespace BlazorHero.CleanArchitecture.Shared.Wrapper
         public int TotalPages { get; set; }
 
         public int TotalCount { get; set; }
+
         public int PageSize { get; set; }
 
         public bool HasPreviousPage => CurrentPage > 1;

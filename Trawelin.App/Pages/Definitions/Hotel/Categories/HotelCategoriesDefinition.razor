@@ -1,82 +1,83 @@
 ﻿@page "/hotelCategories"
-@using Trawelin.App.Shared.Dialogs.Definitions.Hotel.Categories
 @inject Microsoft.Extensions.Localization.IStringLocalizer<HotelCategoriesDefinition> _localizer
 
-<Trawelin.App.Shared.Components.ComponentTitle Title="Categories" Description="Manage Categories" />
+<ComponentTitle Title="Categories" Description="Manage Categories" />
 @if (IsTaskRunning)
 {
-	<MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-}else{
-<MudDataGrid T="CategoryDto" @ref="_mudTable" MultiSelection="true" Items="@categoryList" SortMode="SortMode.Multiple" Filterable="true"
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudDataGrid T="CategoryDto" @ref="_mudTable" MultiSelection="true" Items="@categoryList" SortMode="SortMode.Multiple" Filterable="true"
              QuickFilter="@_quickFilter" Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" Striped="true" Bordered="true">
-    <ToolBarContent>
-        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">@_localizer["CreateButton"]</MudButton>
+        <ToolBarContent>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">@_localizer["CreateButton"]</MudButton>
 
-        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!buttonActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
 
-            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!buttonActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
 
-        <MudSpacer />
+            <MudSpacer />
             @*<MudText Typo="Typo.h4">@_localizer["Title"]</MudText>*@
-        <MudSpacer />
-        <MudTextField @bind-Value="_searchString" Placeholder="@_localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="@_localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-    </ToolBarContent>
-    <Columns>
-        <SelectColumn T="CategoryDto" />
-        <Column T="CategoryDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
-
-        <Column T="CategoryDto" Field="Name" Title="@_localizer["Name"]" Sortable="false" Filterable="false" IsEditable="false" />
-
-    </Columns>
-    <PagerContent>
-        <MudDataGridPager T="CategoryDto" />
-    </PagerContent>
-</MudDataGrid>
+        </ToolBarContent>
+        <Columns>
+            <SelectColumn T="CategoryDto" />
+            <Column T="CategoryDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
+            <Column T="CategoryDto" Field="Name" Title="@_localizer["Name"]" Sortable="false" Filterable="false" IsEditable="false" />
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="CategoryDto" />
+        </PagerContent>
+    </MudDataGrid>
 }
 
 @code {
     //DataGrid Table
     private MudDataGrid<CategoryDto> _mudTable;
+
     //DataGrid Data
     private List<CategoryDto> categoryList = new List<CategoryDto>();
     private List<CategoryDto> selectedItems;
-    //Response Message
-    string result = "";
 
     //Button Active Check
-    bool editActive = false;
-    bool deleteActive = false;
+    bool buttonActive = false;
 
     //Search Bar String
     string _searchString;
 
+    //Dialog Settings
+    DialogOptions options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+
     bool IsTaskRunning = true;
 
-    DialogOptions options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
 
     protected override async Task OnInitializedAsync()
     {
+        //Set Bearer if Auth Null
         if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
         {
             _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
         }
-        //Service Init
-        Client service = new Client("https://api.trawelin.com", _httpClient);
-        //Get Token From Service
+
+        //Get Hotel Categories From Service
         var response = await _hotelCategoriesManager.GetCategoryAsync();
+        
         IsTaskRunning = false;
+        
         if (response.Succeeded == true)
         {
             categoryList = response.Data.ToList();
         }
         else
         {
-            result = response.Error.Message;
+            Snackbar.Add(response.Error.Message, Severity.Error);
         }
     }
 
-
+    //Quick Filter
     private Func<CategoryDto, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
@@ -84,7 +85,6 @@
 
         if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-
 
         return false;
     };
@@ -94,19 +94,23 @@
     void SelectedItemsChanged(HashSet<CategoryDto> items)
     {
         selectedItems = items.ToList();
-
-        editActive = selectedItems.Count == 1;
-        deleteActive = selectedItems.Count > 0;
+        buttonActive = selectedItems.Count == 1;
     }
 
 
 
     async Task DeleteButton()
     {
+        //Get Selected Item From Datatable
         CategoryDto categoryDto = selectedItems[0];
+        
+        //Dialog Parameter
         var parameters = new DialogParameters { ["categoryDto"] = categoryDto };
-
+        
+        //Dialog
         var dialog = DialogService.Show<DeleteHotelCategoriesDialog>("Delete Category", parameters, options);
+        
+        //Dialog Result
         var result = await dialog.Result;
         CategoryDto modalData = result.Data as CategoryDto;
 
@@ -117,7 +121,6 @@
                 var response = await _hotelCategoriesManager.DeleteCategoryAsync(modalData.Id);
                 if (response.Succeeded)
                 {
-
                     _mudTable.SetSelectedItemAsync(categoryDto);
                     categoryList.Remove(categoryDto);
                     Snackbar.Add("Isleminiz Basarili", Severity.Success);
@@ -133,11 +136,17 @@
 
     async Task EditButton()
     {
+        //Get Selected Item From Datatable
         CategoryDto categoryDto = selectedItems[0];
+        
+        //Dialog Parameter
         UpdateCategoryCommand updateCategoryCommand = _mapper.Map<UpdateCategoryCommand>(categoryDto);
         var parameters = new DialogParameters { ["updateCategoryCommand"] = updateCategoryCommand };
-
+        
+        //Dialog
         var dialog = DialogService.Show<EditHotelCategoriesDialog>("Edit Category", parameters, options);
+        
+        //Dialog Result
         var result = await dialog.Result;
         UpdateCategoryCommand modalData = result.Data as UpdateCategoryCommand;
 
@@ -164,10 +173,11 @@
 
     async Task CreateButton()
     {
-        
+        //Dialog
         var dialog = DialogService.Show<CreateHotelCategoriesDialog>("Create Category", options);
-        var result = await dialog.Result;
 
+        //Dialog Result
+        var result = await dialog.Result;
 
         if (!result.Cancelled)
         {

@@ -1,23 +1,19 @@
 ﻿@inject Microsoft.Extensions.Localization.IStringLocalizer<Profile> _localizer
+
 <MudGrid>
     <MudItem xs="12" sm="4" md="3">
         <MudCard Elevation="25">
             <MudCardContent>
                 <div class="d-flex justify-center mb-4">
-                    
-                    
-                        <MudAvatar Color="Color.Secondary" Style="height:250px; width:250px;">S</MudAvatar>
-                    
+                    <MudAvatar Color="Color.Secondary" Style="height:250px; width:250px;">S</MudAvatar>
                 </div>
                 <MudText Typo="Typo.h6" Align="Align.Center">@userModel.UserName</MudText>
                 <MudText Align="Align.Center">@email</MudText>
             </MudCardContent>
-            
         </MudCard>
     </MudItem>
     <MudItem xs="12" sm="8" md="9">
         <EditForm Model="@userModel">
-           
             <MudCard Elevation="25">
                 <MudCardHeader>
                     <CardHeaderContent>
@@ -29,10 +25,6 @@
                         <MudItem xs="12" md="6">
                             <MudTextField @bind-Value="@userModel.UserName" For="@(() => userModel.UserName)" Label="@_localizer["Username"]" Variant="Variant.Outlined" />
                         </MudItem>
-                        @*<MudItem xs="12" md="6">
-                            <MudTextField @bind-Value="@userModel.Email" For="@(() => userModel.Email)" Label="Email" Variant="Variant.Outlined" />
-                        </MudItem>*@
-                        
                     </MudGrid>
                 </MudCardContent>
                 <MudCardActions Class="pb-4 pl-4">
@@ -44,17 +36,19 @@
 </MudGrid>
 
 
-@code{
+@code {
+
     UpdateUserCommand userModel = new();
-    string currentUserId;
     string email;
 
     protected override async Task OnInitializedAsync()
     {
+        //Set Bearer if Auth Null
         if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
         {
             _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
         }
+
         try
         {
             userModel.Id = await _localStorage.GetItemAsync<string>(StorageConstants.Local.userId);
@@ -65,10 +59,10 @@
         {
             Snackbar.Add(ex.Message, Severity.Error);
         }
+
     }
     async Task EditButton()
     {
-        
         try
         {
             var response = await _userManager.UpdateUserAsync(userModel);
@@ -81,8 +75,5 @@
         {
             Snackbar.Add(ex.Message, Severity.Error);
         }
-            
-        
-
     }
 }

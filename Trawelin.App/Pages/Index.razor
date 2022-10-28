@@ -1,6 +1,8 @@
 ﻿@page "/index"
-@using BlazorTemplater
-@using Trawelin.App.Shared.Components
+
+
+@*Tab Sistemi Icin Demo Sayfasi*@
+
 
 <MudDynamicTabs Elevation="4" Rounded="true" KeepPanelsAlive="true" ApplyEffectsToContainer="true" PanelClass="px-4 py-6" AddTab="AddTabCallback" CloseTab="@((panel) => CloseTabCallback(panel))" @bind-ActivePanelIndex="_index" AddIconToolTip="Click here to add a new tab" CloseIconToolTip="Close this tab. All data will be lost">
     @foreach (var item in _tabs)
@@ -9,17 +11,12 @@
 	}
 </MudDynamicTabs>
 
-
-
-
 @code {
 
-	private class TabView
-	{
-		public String Name { get; set; }
-		public RenderFragment Content { get; set; }
-		public Guid Id { get; set; }
-	}
+
+	private List<TabView> _tabs = new();
+	private int _index = 0;
+	private bool _updateIndex = false;
 
 	public List<RenderFragment> renderList = new List<RenderFragment>();
 	public List<String> stringList = new List<string>();
@@ -45,9 +42,7 @@
 		<DynamicComponent Type="typeof(Definitions.Hotel.Accomodation.HotelAccomodationDefinition)"></DynamicComponent>
 	};
 
-	private List<TabView> _tabs = new();
-	private int _index = 0;
-	private bool _updateIndex = false;
+	
 
 
 	protected override void OnInitialized()
@@ -75,8 +70,6 @@
 		_updateIndex = true;
 	}
 
-
-
 	private void CloseTabCallback(MudTabPanel panel)
 	{
 		var tabView = _tabs.FirstOrDefault(x => x.Id == (Guid)panel.Tag);
@@ -96,32 +89,4 @@
 			_updateIndex = false;
 		}
 	}
-	
-
-
 }
-
-
-
-@*<MudGrid>
-    <MudItem xs="12" sm="6" md="3">
-        <MudPaper Elevation="25" Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
-            <MudIcon Icon="@Icons.Material.Filled.ViewCarousel" Color="Color.Primary" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
-            <div>
-                <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1">Product</MudText>
-                <MudText Typo="Typo.h5">5</MudText>
-            </div>
-        </MudPaper>
-    </MudItem>
-    <MudItem xs="12" sm="6" md="3">
-        <MudPaper Elevation="25" Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
-            <MudIcon Icon="@Icons.Material.Filled.PanoramaPhotosphereSelect" Color="Color.Secondary" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
-            <div>
-                <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1">Brand</MudText>
-                <MudText  Typo="Typo.h5">6</MudText>
-            </div>
-        </MudPaper>
-    </MudItem>
-    
-   
-</MudGrid>*@

@@ -1,5 +1,4 @@
-﻿@using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Categories
-@using System.Net.Http
+﻿@using System.Net.Http
 @using System.Net.Http.Json
 @using AutoMapper
 @using Blazored.LocalStorage
@@ -12,6 +11,12 @@
 @using Microsoft.JSInterop
 @using MudBlazor
 @using Trawelin.App
+@using Trawelin.App.Infrastructure
+@using Trawelin.App.Infrastructure.Models
+@using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Categories
+@using Trawelin.App.Infrastructure.Settings
+@using Trawelin.App.Infrastructure.ServiceApi
+@using Trawelin.App.Infrastructure.Constants.Storage
 @using Trawelin.App.Infrastructure.Managers.Definitions.Hotel
 @using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.RoomAccomodationTypes
 @using Trawelin.App.Infrastructure.Managers.Definitions.Hotel.RoomTypes
@@ -24,22 +29,33 @@
 @using Trawelin.App.Infrastructure.Managers.Identity.Users
 @using Trawelin.App.Infrastructure.Managers.Preferences
 @using Trawelin.App.Shared
-@using Trawelin.App.Infrastructure
-@using Trawelin.App.Infrastructure.ServiceApi
-@using Trawelin.App.Infrastructure.Constants.Storage
-@using BlazorHero.CleanArchitecture.Client.Shared.Components
+@using Trawelin.App.Shared.Components
+@using Trawelin.App.Shared.Dialogs.Users
+@using Trawelin.App.Shared.Dialogs.Definitions.Hotel.Categories
+@using Trawelin.App.Shared.Dialogs.Definitions.Hotel.Accomodations
+@using Trawelin.App.Shared.Dialogs.Definitions.Hotel.RoomAccomodationType
+@using Trawelin.App.Shared.Dialogs.Definitions.Hotel.RoomType
+@using Trawelin.App.Shared.Dialogs.Definitions.Hotel.Type
+@using Trawelin.App.Shared.Dialogs.Definitions.Regions.City
+@using Trawelin.App.Shared.Dialogs.Definitions.Regions.Country
+@using Trawelin.App.Shared.Dialogs.Definitions.Regions.District
+@using Trawelin.App.Shared.Dialogs.Definitions.Regions.Village
+@using Trawelin.App.Shared.Dialogs.Definitions.Suppliers
+@using Trawelin.App.Shared.Dialogs.Hotels
 
 @attribute [Authorize]
 @inject HttpClient _httpClient
 @inject NavigationManager _navigationManager
 
+@*Services*@
 @inject IMapper _mapper
-@inject IAuthenticationManager _authenticationManager
 @inject ILocalStorageService _localStorage;
 @inject IDialogService DialogService
-@inject IClientPreferenceManager _clientPreferenceManager
 
 @*Managers Init*@
+@inject IAuthenticationManager _authenticationManager
+@inject IClientPreferenceManager _clientPreferenceManager
+
 @inject IUserManager _userManager
 @inject IRegionManager _regionManager
 @inject ISuppliersManager _suppliersManager

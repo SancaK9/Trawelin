@@ -1,8 +1,7 @@
 ﻿@page "/hotelRoomTypes"
-@using Trawelin.App.Shared.Dialogs.Definitions.Hotel.RoomType
 @inject Microsoft.Extensions.Localization.IStringLocalizer<HotelRoomTypesDefinition> _localizer
 
-<Trawelin.App.Shared.Components.ComponentTitle Title="Room Types" Description="Manage Room Types" />
+<ComponentTitle Title="Room Types" Description="Manage Room Types" />
 
 @if (IsTaskRunning)
 {
@@ -15,9 +14,9 @@ else
         <ToolBarContent>
             <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">@_localizer["CreateButton"]</MudButton>
 
-            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!buttonActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
 
-            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!buttonActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
 
             <MudSpacer />
             @*<MudText Typo="Typo.h4">@_localizer["Title"]</MudText>*@
@@ -44,27 +43,29 @@ else
     //DataGrid Data
     private List<RoomTypeDto> hotelRoomTypeList = new List<RoomTypeDto>();
     private List<RoomTypeDto> selectedItems;
-    //Response Message
-    string result = "";
 
     //Button Active Check
-    bool editActive = false;
-    bool deleteActive = false;
+    bool buttonActive = false;
 
     //Search Bar String
     string _searchString;
 
-    bool IsTaskRunning = true;
+    //Dialog Settings
     DialogOptions options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+
+    bool IsTaskRunning = true;
 
     protected override async Task OnInitializedAsync()
     {
+        //Set Bearer if Auth Null
         if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
         {
             _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
         }
-        //Get Token From Service
+
+        //Get Hotel Room Types From Service
         var response = await _hotelRoomTypesManager.GetRoomTypeAsync();
+
         IsTaskRunning = false;
         if (response.Succeeded == true)
         {
@@ -72,10 +73,11 @@ else
         }
         else
         {
-            result = response.Error.Message;
+            Snackbar.Add(response.Error.Message, Severity.Error);
         }
     }
 
+    //Quick Filter
     private Func<RoomTypeDto, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
@@ -84,26 +86,29 @@ else
         if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-
         return false;
     };
 
     void SelectedItemsChanged(HashSet<RoomTypeDto> items)
     {
         selectedItems = items.ToList();
-
-        editActive = selectedItems.Count == 1;
-        deleteActive = selectedItems.Count > 0;
+        buttonActive = selectedItems.Count == 1;
     }
 
 
 
     async Task DeleteButton()
     {
+        //Get Selected Item From Datatable
         RoomTypeDto roomTypeDto = selectedItems[0];
-        var parameters = new DialogParameters { ["roomTypeDto"] = roomTypeDto };
 
+        //Dialog Parameter
+        var parameters = new DialogParameters { ["roomTypeDto"] = roomTypeDto };
+        
+        //Dialog
         var dialog = DialogService.Show<DeleteHotelRoomTypeDialog>("Delete Room Type", parameters, options);
+        
+        //Dialog Result
         var result = await dialog.Result;
         RoomTypeDto modalData = result.Data as RoomTypeDto;
 
@@ -114,7 +119,6 @@ else
                 var response = await _hotelRoomTypesManager.DeleteRoomTypeAsync(modalData.Id);
                 if (response.Succeeded)
                 {
-
                     _mudTable.SetSelectedItemAsync(roomTypeDto);
                     hotelRoomTypeList.Remove(roomTypeDto);
                     Snackbar.Add("Isleminiz Basarili", Severity.Success);
@@ -130,11 +134,17 @@ else
 
     async Task EditButton()
     {
+        //Get Selected Item From Datatable
         RoomTypeDto roomTypeDto = selectedItems[0];
+        
+        //Dialog Parameter
         UpdateRoomTypeCommand updateRoomTypeCommand = _mapper.Map<UpdateRoomTypeCommand>(roomTypeDto);
         var parameters = new DialogParameters { ["updateRoomTypeCommand"] = updateRoomTypeCommand };
-
+        
+        //Dialog
         var dialog = DialogService.Show<EditHotelRoomTypeDialog>("Edit Room Type", parameters, options);
+        
+        //Dialog Result
         var result = await dialog.Result;
         UpdateRoomTypeCommand modalData = result.Data as UpdateRoomTypeCommand;
 
@@ -161,10 +171,11 @@ else
 
     async Task CreateButton()
     {
-
+        //Dialog
         var dialog = DialogService.Show<CreateHotelRoomTypeDialog>("Create Room Type", options);
+        
+        //Dialog Result
         var result = await dialog.Result;
-
 
         if (!result.Cancelled)
         {
@@ -181,7 +192,7 @@ else
                     }
                     else
                     {
-                        Console.Write(response.Error.Message);
+                        Snackbar.Add(response.Error.Message, Severity.Error);
                     }
                 }
             }

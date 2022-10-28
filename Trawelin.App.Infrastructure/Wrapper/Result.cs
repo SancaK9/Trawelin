@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace BlazorHero.CleanArchitecture.Shared.Wrapper
+﻿namespace BlazorHero.CleanArchitecture.Shared.Wrapper
 {
     public class Result : IResult
     {

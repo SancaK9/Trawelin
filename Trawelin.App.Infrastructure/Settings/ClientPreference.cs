@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Trawelin.App.Infrastructure.Constants.Localization;
+﻿using Trawelin.App.Infrastructure.Constants.Localization;
 
 namespace Trawelin.App.Infrastructure.Settings
 {

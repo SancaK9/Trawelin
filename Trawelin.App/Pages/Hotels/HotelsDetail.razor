@@ -1,49 +1,57 @@
 ﻿@page "/hoteldetails/{id}"
-@using Trawelin.App.Infrastructure.Settings
 
-<MudTabs Elevation="4" KeepPanelsAlive="true" Rounded="true" AlwaysShowScrollButtons="true" Color="Color.Info" Class="mt-4">
+<ComponentTitle Title="Hotel" Description="Manage Hotel" />
+@if (IsTaskRunning)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}else{
+    <MudTabs Elevation="4" KeepPanelsAlive="true" Rounded="true" AlwaysShowScrollButtons="true" Color="Color.Info" Class="mt-4">
 
-    <MudTabPanel Text="Hotel Details"> 
-        <Trawelin.App.Shared.TabPanels.Hotel.HotelDetails.HotelDetailTabPanel id="int.Parse(id)"/>
-    </MudTabPanel>
+        <MudTabPanel Text="Hotel Details">
+            <Trawelin.App.Shared.TabPanels.Hotel.HotelDetails.HotelDetailTabPanel id="int.Parse(id)" />
+        </MudTabPanel>
 
-    <MudTabPanel Text="Room Types"> 
-        <Trawelin.App.Shared.TabPanels.Hotel.HotelDetails.HotelRoomTabPanel id="int.Parse(id)" />
-    </MudTabPanel>
+        <MudTabPanel Text="Room Types">
+            <Trawelin.App.Shared.TabPanels.Hotel.HotelDetails.HotelRoomTabPanel id="int.Parse(id)" />
+        </MudTabPanel>
+
+        <MudTabPanel Text="Prices" />
+    </MudTabs>
 
 
-    <MudTabPanel Text="Prices" />
-
-
-</MudTabs>
-
+}
 
 
 @code {
     [Parameter]
     public string id { get; set; }
 
+    HotelDto currentHotel = new();
+
     bool IsTaskRunning = true;
 
-    HotelDto currentHotel = new();
+    
 
     Color color;
     protected override async Task OnInitializedAsync()
     {
+        //Set Bearer if Auth Null
         if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
         {
             _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
         }
-
+        //Get Current Hotel Details From Service
         var response = await _hotelManager.GetHotelByIdAsync(int.Parse(id));
-        IsTaskRunning = false;
+        
         if (response.Succeeded == true)
         {
             currentHotel = response.Data;
+            IsTaskRunning = false;
         }
         else
         {
             Snackbar.Add(response.Error.Message, Severity.Error);
         }
+        
     }
 }

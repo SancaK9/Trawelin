@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using Blazored.LocalStorage;
-
-using System.Threading.Tasks;
+﻿using Blazored.LocalStorage;
+using BlazorHero.CleanArchitecture.Shared.Wrapper;
 using Microsoft.Extensions.Localization;
+using MudBlazor;
 using Trawelin.App.Infrastructure.Constants.Storage;
 using Trawelin.App.Infrastructure.Settings;
-using BlazorHero.CleanArchitecture.Shared.Wrapper;
-using MudBlazor;
 
 namespace Trawelin.App.Infrastructure.Managers.Preferences
 {
@@ -26,6 +23,7 @@ namespace Trawelin.App.Infrastructure.Managers.Preferences
         public async Task<bool> ToggleDarkModeAsync()
         {
             var preference = await GetPreference() as ClientPreference;
+
             if (preference != null)
             {
                 preference.IsDarkMode = !preference.IsDarkMode;
@@ -38,18 +36,21 @@ namespace Trawelin.App.Infrastructure.Managers.Preferences
         public async Task<bool> ToggleLayoutDirection()
         {
             var preference = await GetPreference() as ClientPreference;
+
             if (preference != null)
             {
                 preference.IsRTL = !preference.IsRTL;
                 await SetPreference(preference);
                 return preference.IsRTL;
             }
+
             return false;
         }
 
         public async Task<IResult> ChangeLanguageAsync(string languageCode)
         {
             var preference = await GetPreference() as ClientPreference;
+
             if (preference != null)
             {
                 preference.LanguageCode = languageCode;
@@ -70,20 +71,24 @@ namespace Trawelin.App.Infrastructure.Managers.Preferences
         public async Task<MudTheme> GetCurrentThemeAsync()
         {
             var preference = await GetPreference() as ClientPreference;
+
             if (preference != null)
             {
                 if (preference.IsDarkMode == true) return BlazorTheme.DarkTheme;
             }
+
             return BlazorTheme.DefaultTheme;
         }
 
         public async Task<bool> IsRTL()
         {
             var preference = await GetPreference() as ClientPreference;
+
             if (preference != null)
             {
                 if (preference.IsDarkMode == true) return false;
             }
+
             return preference.IsRTL;
         }
 

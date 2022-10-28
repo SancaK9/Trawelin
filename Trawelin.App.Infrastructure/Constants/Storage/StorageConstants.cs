@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Trawelin.App.Infrastructure.Constants.Storage
+﻿namespace Trawelin.App.Infrastructure.Constants.Storage
 {
     public static class StorageConstants
     {

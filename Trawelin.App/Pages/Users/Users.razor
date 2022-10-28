@@ -1,54 +1,55 @@
 ﻿@page "/users"
-@using Trawelin.App.Shared.Dialogs.Users
 @inject Microsoft.Extensions.Localization.IStringLocalizer<Users> _localizer
 
-<Trawelin.App.Shared.Components.ComponentTitle Title="Users" Description="Manage Users" />
+<ComponentTitle Title="Users" Description="Manage Users" />
 @if (IsTaskRunning)
 {
-	<MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-}else{
-<MudDataGrid T="ApplicationUserDto" @ref="_mudTable" MultiSelection="true" Items="@UserList" SortMode="SortMode.Multiple" Filterable="true"
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudDataGrid T="ApplicationUserDto" @ref="_mudTable" MultiSelection="true" Items="@UserList" SortMode="SortMode.Multiple" Filterable="true"
              Hideable="true" SelectedItemsChanged="@SelectedItemsChanged" QuickFilter="@_quickFilter" Striped="true" Bordered="true">
-    <ToolBarContent>
-        <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">@_localizer["CreateButton"]</MudButton>
-            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
-            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
+        <ToolBarContent>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">@_localizer["CreateButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!buttonActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!buttonActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
 
-        <MudSpacer />
-        @*<MudText Typo="Typo.h4">@_localizer["UsersTitle"]</MudText>*@
-        <MudSpacer />
-        <MudTextField @bind-Value="_searchString" Placeholder="@_localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
+            <MudSpacer />
+            @*<MudText Typo="Typo.h4">@_localizer["UsersTitle"]</MudText>*@
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="@_localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-    </ToolBarContent>
-    <Columns>
-        <SelectColumn T="ApplicationUserDto" />
-        <Column T="ApplicationUserDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
-        <Column T="ApplicationUserDto"  Field="UserName" Title="@_localizer["Username"]" />
+        </ToolBarContent>
+        <Columns>
+            <SelectColumn T="ApplicationUserDto" />
+            <Column T="ApplicationUserDto" Field="Id" Title="Id" Sortable="false" Filterable="false" IsEditable="false" />
+            <Column T="ApplicationUserDto" Field="UserName" Title="@_localizer["Username"]" />
             <Column T="ApplicationUserDto" Field="@_localizer["Email"]" />
-
-    </Columns>
-    <PagerContent>
-        <MudDataGridPager T="ApplicationUserDto" />
-    </PagerContent>
-</MudDataGrid>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="ApplicationUserDto" />
+        </PagerContent>
+    </MudDataGrid>
 }
 
 @code {
-   
+    //DataGrid Table
     private MudDataGrid<ApplicationUserDto> _mudTable;
 
+    //DataGrid Data
     private List<ApplicationUserDto> selectedItems;
-
     private List<ApplicationUserDto> UserList;
-    string result = "";
-    bool editActive = false;
-    bool deleteActive = false;
+
+    //Button Active Check
+    bool buttonActive = false;
 
     //Search Bar String
     string _searchString;
 
     bool IsTaskRunning = true;
 
+    //Dialog Settings
     DialogOptions options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
 
 
@@ -70,14 +71,15 @@
 
     protected override async Task OnInitializedAsync()
     {
+        //Set Bearer if Auth Null
         if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
         {
             _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
         }
-        //Service Init
-        Client service = new Client("https://api.trawelin.com", _httpClient);
+
         //Get Token From Service
-        var response = await service.ApiUsersGetAsync();
+        var response = await _userManager.GetUsersAsync();
+
         IsTaskRunning = false;
         if (response.Succeeded == true)
         {
@@ -85,30 +87,31 @@
         }
         else
         {
-            result = response.Error.Message;
+            Snackbar.Add(response.Error.Message, Severity.Error);
         }
     }
 
     void SelectedItemsChanged(HashSet<ApplicationUserDto> items)
     {
         selectedItems = items.ToList();
-
-        editActive = selectedItems.Count == 1;
-        deleteActive = selectedItems.Count > 0;
-
+        buttonActive = selectedItems.Count == 1;
     }
-
-
 
     async Task DeleteButton()
     {
-
+        //Get Selected Item From Datatable
         ApplicationUserDto applicationUserDto = selectedItems[0];
-        var parameters = new DialogParameters { ["applicationUserDto"] = applicationUserDto};
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+
+        //Dialog Parameter
+        var parameters = new DialogParameters { ["applicationUserDto"] = applicationUserDto };
+
+        //Dialog
         var dialog = DialogService.Show<DeleteUserDialog>("Delete User", parameters, options);
+
+        //Dialog Result
         var result = await dialog.Result;
         ApplicationUserDto modalData = result.Data as ApplicationUserDto;
+
         if (!result.Cancelled)
         {
             try
@@ -116,7 +119,6 @@
                 var response = await _userManager.DeleteUserAsync(modalData.Id);
                 if (response.Succeeded)
                 {
-
                     UserList.Remove(applicationUserDto);
                     _mudTable.SetSelectedItemAsync(applicationUserDto);
                     Snackbar.Add("Isleminiz Basarili", Severity.Success);
@@ -132,11 +134,17 @@
 
     async Task EditButton()
     {
+        //Get Selected Item From Datatable
         ApplicationUserDto applicationUserDto = selectedItems[0];
+
+        //Dialog Parameter
         UpdateUserCommand updateUserCommand = _mapper.Map<UpdateUserCommand>(applicationUserDto);
-        var parameters = new DialogParameters { ["updateUserCommand"] = updateUserCommand};
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        var parameters = new DialogParameters { ["updateUserCommand"] = updateUserCommand };
+
+        //Dialog
         var dialog = DialogService.Show<EditUserDialog>("Edit User", parameters, options);
+
+        //Dialog Result
         var result = await dialog.Result;
         UpdateUserCommand modalData = result.Data as UpdateUserCommand;
 
@@ -163,11 +171,11 @@
 
     async Task CreateButton()
     {
+        //Dialog
+        var dialog = DialogService.Show<CreateUserDialog>("Create User", options);
 
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
-        var dialog = DialogService.Show<CreateUserDialog>("Create User",options);
+        //Dialog Result
         var result = await dialog.Result;
-
 
         if (!result.Cancelled)
         {

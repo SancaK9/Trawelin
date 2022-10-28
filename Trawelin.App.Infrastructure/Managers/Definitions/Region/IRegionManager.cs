@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Trawelin.App.Infrastructure.ServiceApi;
+﻿using Trawelin.App.Infrastructure.ServiceApi;
 
 namespace Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
 {
@@ -39,6 +34,5 @@ namespace Trawelin.App.Infrastructure.Managers.Identity.Definitions.Region
         Task<VillageDtoServiceResult> CreateVillageAsync(CreateVillageCommand createVillageCommand);
         Task<VillageDtoServiceResult> DeleteVillageAsync(int id);
         Task<VillageDtoServiceResult> UpdateVillageAsync(UpdateVillageCommand updateVillageCommand);
-
     }
 }

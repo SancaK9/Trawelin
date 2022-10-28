@@ -1,5 +1,4 @@
-﻿@using Trawelin.App.Infrastructure.Settings
-@using Trawelin.App.Shared.Components
+﻿
 @inherits LayoutComponentBase
 
 <MudRTLProvider RightToLeft="@_rightToLeft">
@@ -8,25 +7,26 @@
 <MudSnackbarProvider />
 
 <MudLayout>
+
     <MudAppBar Elevation="25">
         <MudImage Src="logo.png"></MudImage>
 
-        <MudToolBar DisableGutters="true">
-            <MudIconButton Icon="@Icons.Material.Outlined.Menu" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())" Class="ml-3" />
-        </MudToolBar>
-
         <MudSpacer />
-
 
         <MudIconButton Icon="@Icons.Material.Outlined.Notifications" Color="Color.Inherit" />
         <MudIconButton Icon="@Icons.Material.Outlined.PushPin" Color="Color.Inherit" />
         <MudIconButton Icon="@Icons.Material.Outlined.PeopleAlt" Color="Color.Inherit" />
+
         <MudDivider Vertical="true"/>
+        
         <MudIconButton Icon="@Icons.Material.Filled.Brightness4" Color="Color.Inherit" OnClick="@((e) => DarkMode())" />
-        <MudTooltip Text="RTL">
+        
+            <MudTooltip Text="RTL">
             <MudIconButton Icon="@Icons.Material.Filled.FormatTextdirectionRToL" Color="Color.Inherit" OnClick="@((e) => RightToLeftToggle())" />
         </MudTooltip>
+        
         <LanguageSelector />
+        
         <MudMenu OffsetX="true" Dense="true" Class="mt-1 ml-4">
             <ActivatorContent>
 
@@ -40,16 +40,21 @@
 
             </ChildContent>
         </MudMenu>
+
     </MudAppBar>
+
     <MudDrawer @bind-Open="_drawerOpen" Elevation="25" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true">
         <NavMenu />
     </MudDrawer>
+
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="my-10">
             @Body
         </MudContainer>
     </MudMainContent>
+
 </MudLayout>
+
 </MudRTLProvider>
 @code {
     private MudTheme _theme = new();
@@ -86,7 +91,5 @@
             ? BlazorTheme.DefaultTheme
             : BlazorTheme.DarkTheme;
     }
-
-  
 
 }

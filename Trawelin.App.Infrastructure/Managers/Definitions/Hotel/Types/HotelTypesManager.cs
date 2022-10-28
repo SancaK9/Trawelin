@@ -25,36 +25,31 @@ namespace Trawelin.App.Infrastructure.Managers.Definitions.Hotel.Types
         public async Task<HotelTypeDtoServiceResult> CreateHotelTypeAsync(CreateHotelTypeCommand createHotelTypeCommand)
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
-            var response = await service.ApiHotelTypesPostAsync(createHotelTypeCommand);
-            return response;
+            return await service.ApiHotelTypesPostAsync(createHotelTypeCommand);
         }
 
         public async Task<HotelTypeDtoServiceResult> DeleteHotelTypeAsync(int id)
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
-            var response = await service.ApiHotelTypesDeleteAsync(id);
-            return response;
+            return await service.ApiHotelTypesDeleteAsync(id);
         }
 
         public async Task<HotelTypeDtoListServiceResult> GetHotelTypeAsync()
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
-            var response = await service.ApiHotelTypesGetAsync();
-            return response;
+            return await service.ApiHotelTypesGetAsync();
         }
 
         public async Task<HotelTypeDtoServiceResult> GetHotelTypeByIdAsync(int id)
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
-            var response = await service.ApiHotelTypesGetAsync(id);
-            return response;
+            return await service.ApiHotelTypesGetAsync(id);
         }
 
         public async Task<HotelTypeDtoServiceResult> UpdateHotelTypeAsync(UpdateHotelTypeCommand updateHotelTypeCommand)
         {
             Client service = new Client(StorageConstants.Local.baseUrl, _httpClient);
-            var response = await service.ApiHotelTypesPutAsync(updateHotelTypeCommand);
-            return response;
+            return await service.ApiHotelTypesPutAsync(updateHotelTypeCommand);
         }
     }
 }

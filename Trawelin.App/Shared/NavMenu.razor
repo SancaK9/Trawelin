@@ -3,17 +3,11 @@
 <UserCard  />
 <MudDivider />
 <MudNavMenu>
-    @*<MudListSubheader Class="mt-2 mb-n2">@_localizer["HomeTitle"]</MudListSubheader>*@
     <MudNavLink Icon="@Icons.Material.Filled.Dashboard" Href="/index">@_localizer["Dashboard"]</MudNavLink>
     <MudDivider/>
-    @*<MudListSubheader Class="mt-2 mb-n2">@_localizer["ReservationTitle"]</MudListSubheader>*@
     <MudNavLink Icon="@Icons.Material.Filled.Assignment" Href="/rezervation">@_localizer["Rezervations"]</MudNavLink>
     <MudDivider />
 
-
-    @*Nav Hotel Section*@
-
-    @*<MudListSubheader Class="mt-2 mb-n2">@_localizer["HotelTitle"]</MudListSubheader>*@
 
     <MudNavLink Icon="@Icons.Material.Filled.Hotel" Href="/hotels">@_localizer["Hotels"]</MudNavLink>
 
@@ -29,12 +23,8 @@
     <MudNavLink Icon="@Icons.Material.Filled.Monitor" Href="/stopfreesale">@_localizer["StopFreeSale"]</MudNavLink>
 
     <MudDivider />
-    @*Nav Operation Section*@
-    @*<MudListSubheader Class="mt-2 mb-n2">@_localizer["OperationTitle"]</MudListSubheader>*@
+
     <MudNavLink Icon="@Icons.Material.Filled.SettingsSuggest" Href="/operation">@_localizer["Operations"]</MudNavLink>
-
-
-
 
     <MudDivider Class="my-2" />
 
@@ -54,7 +44,4 @@
         Username = await _localStorage.GetItemAsync<string>(StorageConstants.Local.userUsername);
         Email = await _localStorage.GetItemAsync<string>(StorageConstants.Local.userEmail);
     }
-
-    
-
 }

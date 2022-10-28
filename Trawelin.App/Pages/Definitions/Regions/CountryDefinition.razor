@@ -1,8 +1,7 @@
 ﻿@page "/countryDefinition"
-@using Trawelin.App.Shared.Dialogs.Definitions.Regions.Country
 @inject Microsoft.Extensions.Localization.IStringLocalizer<CountryDefinition> _localizer
 
-<Trawelin.App.Shared.Components.ComponentTitle Title="Countries" Description="Manage Countries" />
+<ComponentTitle Title="Countries" Description="Manage Countries" />
 @if (IsTaskRunning)
 {
 	<MudProgressCircular Color="Color.Primary" Indeterminate="true" />
@@ -12,16 +11,12 @@
         <ToolBarContent>
             <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="CreateButton" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">@_localizer["CreateButton"]</MudButton>
 
-            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!deleteActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="DeleteButton" Disabled="!buttonActive" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">@_localizer["DeleteButton"]</MudButton>
 
-            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="EditButton" Disabled="!buttonActive" EndIcon="@Icons.Material.Filled.Edit" Color="Color.Info">@_localizer["EditButton"]</MudButton>
 
-            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="GoToCityButton" Disabled="!editActive" EndIcon="@Icons.Material.Filled.ArrowRight" Color="Color.Info">@_localizer["GoToButton"]</MudButton>
+            <MudButton Style="margin-left:10px" Variant="Variant.Filled" OnClick="GoToCityButton" Disabled="!buttonActive" EndIcon="@Icons.Material.Filled.ArrowRight" Color="Color.Info">@_localizer["GoToButton"]</MudButton>
 
-
-            <MudSpacer />
-            @*<MudText Typo="Typo.h4">@_localizer["Title"]</MudText>*@
-            <MudSpacer />
             <MudTextField @bind-Value="_searchString" Placeholder="@_localizer["Search"]" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
@@ -36,10 +31,7 @@
             <MudDataGridPager T="CountryDto" />
         </PagerContent>
     </MudDataGrid>
-
 }
-
-
 
 @code {
     //DataGrid Table
@@ -47,15 +39,15 @@
     //DataGrid Data
     private List<CountryDto> countryList = new List<CountryDto>();
     private List<CountryDto> selectedItems;
-    //Response Message
-    string result = "";
 
     //Button Active Check
-    bool editActive = false;
-    bool deleteActive = false;
+    bool buttonActive = false;
 
     //Search Bar String
     string _searchString;
+
+    //Dialog Settings
+    DialogOptions options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
 
     bool IsTaskRunning = true;
 
@@ -77,14 +69,13 @@
 
     protected override async Task OnInitializedAsync()
     {
+        //Set Bearer if Auth Null
         if (_httpClient.DefaultRequestHeaders.Authorization?.Scheme != "Bearer")
         {
             _httpClient.DefaultRequestHeaders.Add(StorageConstants.Local.headerName, "Bearer " + await _localStorage.GetItemAsync<string>(StorageConstants.Local.AuthToken));
         }
 
-        //Service Init
-        Client service = new Client("https://api.trawelin.com", _httpClient);
-        //Get Token From Service
+        //Get Country From Service
         var response = await _regionManager.GetCountryAsync();
         IsTaskRunning = false;
         if (response.Succeeded == true)
@@ -93,7 +84,7 @@
         }
         else
         {
-            result = response.Error.Message;
+            Snackbar.Add(response.Error.Message, Severity.Error);
         }
     }
 
@@ -101,19 +92,23 @@
     void SelectedItemsChanged(HashSet<CountryDto> items)
     {
         selectedItems = items.ToList();
-
-        editActive = selectedItems.Count == 1;
-        deleteActive = selectedItems.Count > 0;
+        buttonActive = selectedItems.Count == 1;
     }
 
 
 
     async Task DeleteButton()
     {
+        //Get Selected Item From Datatable
         CountryDto countryDto = selectedItems[0];
+        
+        //Dialog Parameter
         var parameters = new DialogParameters { ["countryDto"] = countryDto };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        
+        //Dialog
         var dialog = DialogService.Show<DeleteCountryDialog>("Delete Country", parameters,options);
+        
+        //Dialog Result
         var result = await dialog.Result;
         CountryDto modalData = result.Data as CountryDto;
 
@@ -122,15 +117,10 @@
             try
             {
                 var response = await _regionManager.DeleteCountryAsync(modalData.Id);
-
-
-
-
                 if (response.Succeeded)
                 {
                     _mudTable.SetSelectedItemAsync(countryDto);
-
-                    bool deleteResult = countryList.Remove(countryDto);
+                    countryList.Remove(countryDto);
                     Snackbar.Add("Isleminiz Basarili", Severity.Success);
                 }
                 else
@@ -148,12 +138,17 @@
 
     async Task EditButton()
     {
+        //Get Selected Item From Datatable
         CountryDto dto = selectedItems[0];
+        
+        //Dialog Parameter
         UpdateCountryCommand updateCountryCommand = _mapper.Map<UpdateCountryCommand>(dto);
-
         var parameters = new DialogParameters { ["updateCountryCommand"] = updateCountryCommand };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        
+        //Dialog
         var dialog = DialogService.Show<EditCountryDialog>("Edit Country", parameters,options);
+        
+        //Dialog Result
         var result = await dialog.Result;
         UpdateCountryCommand modalData = result.Data as UpdateCountryCommand;
 
@@ -184,11 +179,11 @@
 
     async Task CreateButton()
     {
-        var parameters = new DialogParameters { };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
-        var dialog = DialogService.Show<CreateCountryDialog>("Create Country", parameters,options);
+        //Dialog
+        var dialog = DialogService.Show<CreateCountryDialog>("Create Country", options);
+        
+        //Dialog Result
         var result = await dialog.Result;
-
 
         if (!result.Cancelled)
         {

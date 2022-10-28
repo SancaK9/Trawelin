@@ -1,29 +1,31 @@
 ﻿@if (IsTaskRunning)
 {
-	<MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-}else{
-<MudGrid>
-    <MudItem xs="12" md="6">
-        <MudCard>
-            <MudForm>
-                <MudCardContent >
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudCard>
+                <MudForm>
+                    <MudCardContent>
                         <MudTextField Class="pa-4" @bind-Value="@model.Name" Label="Name" />
-                    <MudTextField Class="pa-4" @bind-Value="@model.General.Email" Label="Email" />
-                    <MudTextField Class="pa-4" @bind-Value="@model.General.Emails" Label="Emails" />
-                    <MudTextField Class="pa-4" @bind-Value="@model.General.Phone" Label="Phone Number" />
-                    <MudTextField Class="pa-4" @bind-Value="@model.General.Manager" Label="Manager" />
-                    <MudTextField Class="pa-4" @bind-Value="@model.General.Note" Label="Notes" />
-                </MudCardContent>
-            </MudForm>
-            <MudCardActions>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" >Save</MudButton>
-            </MudCardActions>
-        </MudCard>
-    </MudItem>
-    <MudItem xs="12" md="6">
-        <MudCard>
-            <MudForm>
-                <MudCardContent >
+                        <MudTextField Class="pa-4" @bind-Value="@model.General.Email" Label="Email" />
+                        <MudTextField Class="pa-4" @bind-Value="@model.General.Emails" Label="Emails" />
+                        <MudTextField Class="pa-4" @bind-Value="@model.General.Phone" Label="Phone Number" />
+                        <MudTextField Class="pa-4" @bind-Value="@model.General.Manager" Label="Manager" />
+                        <MudTextField Class="pa-4" @bind-Value="@model.General.Note" Label="Notes" />
+                    </MudCardContent>
+                </MudForm>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Save</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudCard>
+                <MudForm>
+                    <MudCardContent>
 
                         <Trawelin.App.Shared.Components.CategorySelector categoryId="model.General.CategoryId" CategoryChanged="SelectedCategory" />
 
@@ -31,17 +33,17 @@
 
                         <Trawelin.App.Shared.Components.SupplierSelector supplierId="model.SupplierId" SupplierChanged="SelectedSupplier" />
 
-                   
-                    <Trawelin.App.Shared.Components.RegionSelector villageId="model.General.RegionId" />
-                </MudCardContent>
 
-            </MudForm>
-            <MudCardActions>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Save</MudButton>
-            </MudCardActions>
-        </MudCard>
-    </MudItem>
-</MudGrid>
+                        <Trawelin.App.Shared.Components.RegionSelector villageId="model.General.RegionId" />
+                    </MudCardContent>
+
+                </MudForm>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Save</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
 }
 @code {
 
@@ -49,9 +51,6 @@
     public int id { get; set; }
 
     HotelDto model = new HotelDto();
-
-    bool IsTaskRunning = true;
-
 
     private MudAutocomplete<SupplierDto> supplierAuto;
 
@@ -65,20 +64,25 @@
     void SelectedHotelType(HotelTypeDto hotelTypeDto) => model.General.HotelTypeId = hotelTypeDto.Id;
     void SelectedSupplier(SupplierDto supplierDto) => model.SupplierId = supplierDto.Id;
 
+    bool IsTaskRunning = true;
+
     protected override async Task OnInitializedAsync()
     {
-
-        var result = await _hotelManager.GetHotelByIdAsync(id);
-        if (result.Succeeded)
+        var response = await _hotelManager.GetHotelByIdAsync(id);
+        if (response.Succeeded)
         {
-            model = result.Data;
+            model = response.Data;
             IsTaskRunning = false;
-            
+
+        }
+        else
+        {
+            Snackbar.Add(response.Error.Message, Severity.Error);
         }
     }
 
-  
-    
+
+
     private async Task OnHotelTypeValueChanged(HotelTypeDto hotelType)
     {
         model.General.HotelTypeId = hotelType.Id;
@@ -91,12 +95,12 @@
 
         return;
     }
-    
+
     //
     private async Task<IEnumerable<HotelTypeDto>> SearchHoteType(string value)
     {
 
-        // if text is null or empty, show complete list
+        // If text is null or empty, show complete list
         if (string.IsNullOrEmpty(value))
             return hotelTypeDtos;
         return hotelTypeDtos.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
@@ -104,17 +108,10 @@
     private async Task<IEnumerable<SupplierDto>> SearchSupplier(string value)
     {
 
-        // if text is null or empty, show complete list
+        // If text is null or empty, show complete list
         if (string.IsNullOrEmpty(value))
             return supplierDto;
         return supplierDto.Where(x => x.Title.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
-
-
-    private async Task Submit()
-    {
-        
-    }
-
 
 }
